@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func checkDecisionsEqual(a []Decision, b []Decision) bool {

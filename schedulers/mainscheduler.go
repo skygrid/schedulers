@@ -33,7 +33,7 @@ func (m MainScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume)
 			if (j.TimePeriod <= w.TimePeriod) && (j.CPU <= w.CPU) && (j.GPU <= w.GPU) && (j.RAMmb <= w.RAMmb) {
 				d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
 				workers = append(workers[:i], workers[i+1:]...)
-				break;
+				break
 			}
 		}
 	}
