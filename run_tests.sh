@@ -1,0 +1,1 @@
+cd schedulers; go test -v .; cd ..

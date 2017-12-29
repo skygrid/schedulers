@@ -1,0 +1,23 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+message Organization {
+    string Name = 1;
+    google.protobuf.Any Quota = 2;
+}
+
+message ResourceVolume {
+    uint32 CPU = 1;
+    uint32 GPU = 2;
+
+    uint32 RAMmb = 3;
+    int64 TimePeriod = 4;
+
+    Organization Owner = 5;
+}
+
+message Decision {
+    // Pairs jobs[idx] -> workers[idx]
+    uint64 JobIdx = 1;
+    uint64 WorkerIdx = 2;
+}
