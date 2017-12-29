@@ -1,19 +1,19 @@
 syntax = "proto3";
-import "google/protobuf/any.proto";
 
 message Organization {
     string Name = 1;
-    google.protobuf.Any Quota = 2;
+    uint32 Quota = 2;
 }
 
 message ResourceVolume {
-    uint32 CPU = 1;
-    uint32 GPU = 2;
+    uint64 id = 1;
+    uint32 CPU = 2;
+    uint32 GPU = 3;
 
-    uint32 RAMmb = 3;
-    int64 TimePeriod = 4;
+    uint32 RAMmb = 4;
+    int64 TimePeriod = 5;
 
-    Organization Owner = 5;
+    Organization Owner = 6;
 }
 
 message Decision {
