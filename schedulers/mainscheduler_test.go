@@ -13,9 +13,14 @@ func checkDecisionsEqual(a []Decision, b []Decision) bool {
 	}
 	return true
 }
+
 func TestMainScheduler(t *testing.T) {
 	m := MainScheduler{}
-	o1 := Organization{Name: "SHiP", Quota: 100}
+
+	// 10% project weight , 40% of CPUhours
+	quota := Quotum{0.1, &Quotum_CPUratio{0.4}}
+
+	o1 := Organization{Name: "SHiP", Quota: &quota}
 	rv1 := ResourceVolume{CPU: 2, RAMmb: 1, TimePeriod: 40, Owner: &o1, Id: 21}
 	rv2 := ResourceVolume{CPU: 1, RAMmb: 2, TimePeriod: 40, Owner: &o1, Id: 12}
 	jobs := []ResourceVolume{rv1, rv2}

@@ -8,6 +8,7 @@ It is generated from these files:
 	scheduler.proto
 
 It has these top-level messages:
+	Quotum
 	Organization
 	ResourceVolume
 	Decision
@@ -29,15 +30,186 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type Quotum struct {
+	Ratio float32 `protobuf:"fixed32,1,opt,name=ratio" json:"ratio,omitempty"`
+	// Types that are valid to be assigned to Q:
+	//	*Quotum_CPUratio
+	//	*Quotum_GBratio
+	//	*Quotum_CPUabs
+	//	*Quotum_GBabs
+	Q isQuotum_Q `protobuf_oneof:"Q"`
+}
+
+func (m *Quotum) Reset()                    { *m = Quotum{} }
+func (m *Quotum) String() string            { return proto.CompactTextString(m) }
+func (*Quotum) ProtoMessage()               {}
+func (*Quotum) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+type isQuotum_Q interface {
+	isQuotum_Q()
+}
+
+type Quotum_CPUratio struct {
+	CPUratio float32 `protobuf:"fixed32,10,opt,name=CPUratio,oneof"`
+}
+type Quotum_GBratio struct {
+	GBratio float32 `protobuf:"fixed32,11,opt,name=GBratio,oneof"`
+}
+type Quotum_CPUabs struct {
+	CPUabs uint32 `protobuf:"varint,12,opt,name=CPUabs,oneof"`
+}
+type Quotum_GBabs struct {
+	GBabs uint32 `protobuf:"varint,13,opt,name=GBabs,oneof"`
+}
+
+func (*Quotum_CPUratio) isQuotum_Q() {}
+func (*Quotum_GBratio) isQuotum_Q()  {}
+func (*Quotum_CPUabs) isQuotum_Q()   {}
+func (*Quotum_GBabs) isQuotum_Q()    {}
+
+func (m *Quotum) GetQ() isQuotum_Q {
+	if m != nil {
+		return m.Q
+	}
+	return nil
+}
+
+func (m *Quotum) GetRatio() float32 {
+	if m != nil {
+		return m.Ratio
+	}
+	return 0
+}
+
+func (m *Quotum) GetCPUratio() float32 {
+	if x, ok := m.GetQ().(*Quotum_CPUratio); ok {
+		return x.CPUratio
+	}
+	return 0
+}
+
+func (m *Quotum) GetGBratio() float32 {
+	if x, ok := m.GetQ().(*Quotum_GBratio); ok {
+		return x.GBratio
+	}
+	return 0
+}
+
+func (m *Quotum) GetCPUabs() uint32 {
+	if x, ok := m.GetQ().(*Quotum_CPUabs); ok {
+		return x.CPUabs
+	}
+	return 0
+}
+
+func (m *Quotum) GetGBabs() uint32 {
+	if x, ok := m.GetQ().(*Quotum_GBabs); ok {
+		return x.GBabs
+	}
+	return 0
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*Quotum) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _Quotum_OneofMarshaler, _Quotum_OneofUnmarshaler, _Quotum_OneofSizer, []interface{}{
+		(*Quotum_CPUratio)(nil),
+		(*Quotum_GBratio)(nil),
+		(*Quotum_CPUabs)(nil),
+		(*Quotum_GBabs)(nil),
+	}
+}
+
+func _Quotum_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*Quotum)
+	// Q
+	switch x := m.Q.(type) {
+	case *Quotum_CPUratio:
+		b.EncodeVarint(10<<3 | proto.WireFixed32)
+		b.EncodeFixed32(uint64(math.Float32bits(x.CPUratio)))
+	case *Quotum_GBratio:
+		b.EncodeVarint(11<<3 | proto.WireFixed32)
+		b.EncodeFixed32(uint64(math.Float32bits(x.GBratio)))
+	case *Quotum_CPUabs:
+		b.EncodeVarint(12<<3 | proto.WireVarint)
+		b.EncodeVarint(uint64(x.CPUabs))
+	case *Quotum_GBabs:
+		b.EncodeVarint(13<<3 | proto.WireVarint)
+		b.EncodeVarint(uint64(x.GBabs))
+	case nil:
+	default:
+		return fmt.Errorf("Quotum.Q has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _Quotum_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*Quotum)
+	switch tag {
+	case 10: // Q.CPUratio
+		if wire != proto.WireFixed32 {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeFixed32()
+		m.Q = &Quotum_CPUratio{math.Float32frombits(uint32(x))}
+		return true, err
+	case 11: // Q.GBratio
+		if wire != proto.WireFixed32 {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeFixed32()
+		m.Q = &Quotum_GBratio{math.Float32frombits(uint32(x))}
+		return true, err
+	case 12: // Q.CPUabs
+		if wire != proto.WireVarint {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeVarint()
+		m.Q = &Quotum_CPUabs{uint32(x)}
+		return true, err
+	case 13: // Q.GBabs
+		if wire != proto.WireVarint {
+			return true, proto.ErrInternalBadWireType
+		}
+		x, err := b.DecodeVarint()
+		m.Q = &Quotum_GBabs{uint32(x)}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _Quotum_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*Quotum)
+	// Q
+	switch x := m.Q.(type) {
+	case *Quotum_CPUratio:
+		n += proto.SizeVarint(10<<3 | proto.WireFixed32)
+		n += 4
+	case *Quotum_GBratio:
+		n += proto.SizeVarint(11<<3 | proto.WireFixed32)
+		n += 4
+	case *Quotum_CPUabs:
+		n += proto.SizeVarint(12<<3 | proto.WireVarint)
+		n += proto.SizeVarint(uint64(x.CPUabs))
+	case *Quotum_GBabs:
+		n += proto.SizeVarint(13<<3 | proto.WireVarint)
+		n += proto.SizeVarint(uint64(x.GBabs))
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
 type Organization struct {
-	Name  string `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
-	Quota uint32 `protobuf:"varint,2,opt,name=Quota" json:"Quota,omitempty"`
+	Name  string  `protobuf:"bytes,1,opt,name=Name" json:"Name,omitempty"`
+	Quota *Quotum `protobuf:"bytes,2,opt,name=Quota" json:"Quota,omitempty"`
 }
 
 func (m *Organization) Reset()                    { *m = Organization{} }
 func (m *Organization) String() string            { return proto.CompactTextString(m) }
 func (*Organization) ProtoMessage()               {}
-func (*Organization) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*Organization) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 func (m *Organization) GetName() string {
 	if m != nil {
@@ -46,15 +218,15 @@ func (m *Organization) GetName() string {
 	return ""
 }
 
-func (m *Organization) GetQuota() uint32 {
+func (m *Organization) GetQuota() *Quotum {
 	if m != nil {
 		return m.Quota
 	}
-	return 0
+	return nil
 }
 
 type ResourceVolume struct {
-	Id         uint64        `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+	Id         uint64        `protobuf:"varint,1,opt,name=Id" json:"Id,omitempty"`
 	CPU        uint32        `protobuf:"varint,2,opt,name=CPU" json:"CPU,omitempty"`
 	GPU        uint32        `protobuf:"varint,3,opt,name=GPU" json:"GPU,omitempty"`
 	RAMmb      uint32        `protobuf:"varint,4,opt,name=RAMmb" json:"RAMmb,omitempty"`
@@ -65,7 +237,7 @@ type ResourceVolume struct {
 func (m *ResourceVolume) Reset()                    { *m = ResourceVolume{} }
 func (m *ResourceVolume) String() string            { return proto.CompactTextString(m) }
 func (*ResourceVolume) ProtoMessage()               {}
-func (*ResourceVolume) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*ResourceVolume) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 func (m *ResourceVolume) GetId() uint64 {
 	if m != nil {
@@ -118,7 +290,7 @@ type Decision struct {
 func (m *Decision) Reset()                    { *m = Decision{} }
 func (m *Decision) String() string            { return proto.CompactTextString(m) }
 func (*Decision) ProtoMessage()               {}
-func (*Decision) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*Decision) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *Decision) GetJobIdx() uint64 {
 	if m != nil {
@@ -135,6 +307,7 @@ func (m *Decision) GetWorkerIdx() uint64 {
 }
 
 func init() {
+	proto.RegisterType((*Quotum)(nil), "Quotum")
 	proto.RegisterType((*Organization)(nil), "Organization")
 	proto.RegisterType((*ResourceVolume)(nil), "ResourceVolume")
 	proto.RegisterType((*Decision)(nil), "Decision")
@@ -143,21 +316,26 @@ func init() {
 func init() { proto.RegisterFile("scheduler.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 247 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x90, 0x4f, 0x4b, 0xc4, 0x30,
-	0x14, 0xc4, 0x49, 0xff, 0xe1, 0x3e, 0xdd, 0x55, 0x82, 0x48, 0x0e, 0x22, 0xa5, 0x5e, 0x7a, 0xda,
-	0x83, 0x5e, 0x3c, 0x2a, 0x0a, 0x8b, 0x82, 0x6e, 0x0d, 0x56, 0xcf, 0x6d, 0xf3, 0xd0, 0xe0, 0xb6,
-	0x4f, 0xd2, 0x16, 0xc5, 0x2f, 0xe3, 0x57, 0x95, 0x24, 0x85, 0xdd, 0xdb, 0x9b, 0xdf, 0x30, 0x43,
-	0x26, 0x70, 0xd8, 0x37, 0x1f, 0xa8, 0xc6, 0x0d, 0x9a, 0xe5, 0x97, 0xa1, 0x81, 0xb2, 0x2b, 0x38,
-	0x58, 0x9b, 0xf7, 0xaa, 0xd3, 0xbf, 0xd5, 0xa0, 0xa9, 0xe3, 0x1c, 0xa2, 0xa7, 0xaa, 0x45, 0xc1,
-	0x52, 0x96, 0xcf, 0xa4, 0xbb, 0xf9, 0x31, 0xc4, 0xcf, 0x23, 0x0d, 0x95, 0x08, 0x52, 0x96, 0xcf,
-	0xa5, 0x17, 0xd9, 0x1f, 0x83, 0x85, 0xc4, 0x9e, 0x46, 0xd3, 0xe0, 0x2b, 0x6d, 0xc6, 0x16, 0xf9,
-	0x02, 0x02, 0xad, 0x5c, 0x34, 0x92, 0x81, 0x56, 0xfc, 0x08, 0xc2, 0xdb, 0xa2, 0x9c, 0x62, 0xf6,
-	0xb4, 0x64, 0x55, 0x94, 0x22, 0xf4, 0x64, 0x55, 0x94, 0xb6, 0x5c, 0xde, 0x3c, 0xb6, 0xb5, 0x88,
-	0x7c, 0xb9, 0x13, 0xfc, 0x0c, 0xe0, 0x45, 0xb7, 0x58, 0xa0, 0xd1, 0xa4, 0x44, 0x9c, 0xb2, 0x3c,
-	0x94, 0x3b, 0x84, 0x9f, 0x43, 0xbc, 0xfe, 0xee, 0xd0, 0x88, 0x24, 0x65, 0xf9, 0xfe, 0xc5, 0x7c,
-	0xb9, 0x3b, 0x42, 0x7a, 0x2f, 0xbb, 0x86, 0xbd, 0x3b, 0x6c, 0x74, 0x6f, 0x77, 0x9d, 0x40, 0xf2,
-	0x40, 0xf5, 0xbd, 0xfa, 0x99, 0x9e, 0x37, 0x29, 0x7e, 0x0a, 0xb3, 0x37, 0x32, 0x9f, 0x68, 0xac,
-	0x15, 0x38, 0x6b, 0x0b, 0xea, 0xc4, 0x7d, 0xd2, 0xe5, 0x7f, 0x00, 0x00, 0x00, 0xff, 0xff, 0xd5,
-	0xd1, 0xa3, 0x85, 0x37, 0x01, 0x00, 0x00,
+	// 323 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x4c, 0x91, 0xd1, 0x4e, 0xc2, 0x30,
+	0x14, 0x86, 0xe9, 0xc6, 0x06, 0x1c, 0x18, 0x9a, 0x13, 0x43, 0x1a, 0x83, 0x66, 0x99, 0x37, 0xbb,
+	0xe2, 0x42, 0x5f, 0x40, 0xc0, 0x64, 0x60, 0xa2, 0x8c, 0xc6, 0xe9, 0xf5, 0xc6, 0x1a, 0x5d, 0x64,
+	0xd4, 0x74, 0x2c, 0x1a, 0x5f, 0xc2, 0x47, 0xf0, 0x55, 0x4d, 0xdb, 0xa9, 0xdc, 0x9d, 0xff, 0xfb,
+	0xb2, 0x93, 0xff, 0xac, 0x70, 0x54, 0x6d, 0x5e, 0x78, 0x5e, 0x6f, 0xb9, 0x9c, 0xbc, 0x49, 0xb1,
+	0x17, 0xc1, 0x17, 0x01, 0x77, 0x5d, 0x8b, 0x7d, 0x5d, 0xe2, 0x09, 0x38, 0x32, 0xdd, 0x17, 0x82,
+	0x12, 0x9f, 0x84, 0x16, 0x33, 0x01, 0xc7, 0xd0, 0x9d, 0xc7, 0x89, 0x11, 0xa0, 0xc4, 0xa2, 0xc5,
+	0xfe, 0x08, 0x9e, 0x42, 0x27, 0x9a, 0x19, 0xd9, 0x6f, 0xe4, 0x2f, 0x40, 0x0a, 0xee, 0x3c, 0x4e,
+	0xd2, 0xac, 0xa2, 0x03, 0x9f, 0x84, 0xde, 0xa2, 0xc5, 0x9a, 0x8c, 0x23, 0x70, 0xa2, 0x99, 0x12,
+	0x5e, 0x23, 0x4c, 0x9c, 0xd9, 0x40, 0xd6, 0xc1, 0x14, 0x06, 0x2b, 0xf9, 0x9c, 0xee, 0x8a, 0x4f,
+	0xb5, 0x65, 0x87, 0x08, 0xed, 0xfb, 0xb4, 0xe4, 0xba, 0x55, 0x8f, 0xe9, 0x19, 0xcf, 0xc0, 0x51,
+	0xa5, 0x53, 0x6a, 0xf9, 0x24, 0xec, 0x5f, 0x76, 0x26, 0xe6, 0x04, 0x66, 0x68, 0xf0, 0x4d, 0x60,
+	0xc8, 0x78, 0x25, 0x6a, 0xb9, 0xe1, 0x8f, 0x62, 0x5b, 0x97, 0x1c, 0x87, 0x60, 0x2d, 0x73, 0xbd,
+	0xa3, 0xcd, 0xac, 0x65, 0x8e, 0xc7, 0x60, 0xcf, 0xe3, 0x44, 0x7f, 0xef, 0x31, 0x35, 0x2a, 0x12,
+	0xc5, 0x09, 0xb5, 0x0d, 0x89, 0xe2, 0x44, 0xfd, 0x10, 0x36, 0xbd, 0x2b, 0x33, 0xda, 0xd6, 0xcc,
+	0x04, 0x3c, 0x07, 0x78, 0x28, 0x4a, 0x1e, 0x73, 0x59, 0x88, 0x9c, 0x3a, 0x3e, 0x09, 0x6d, 0x76,
+	0x40, 0xf0, 0x02, 0x9c, 0xd5, 0xfb, 0x8e, 0x4b, 0xea, 0xea, 0x6e, 0xde, 0xe4, 0xf0, 0x1a, 0x66,
+	0x5c, 0x70, 0x0d, 0xdd, 0x1b, 0xbe, 0x29, 0x2a, 0x75, 0xe0, 0x08, 0xdc, 0x5b, 0x91, 0x2d, 0xf3,
+	0x8f, 0xa6, 0x5e, 0x93, 0x70, 0x0c, 0xbd, 0x27, 0x21, 0x5f, 0xb9, 0x54, 0xca, 0xd2, 0xea, 0x1f,
+	0x64, 0xae, 0x7e, 0xbf, 0xab, 0x9f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2e, 0xe3, 0x6e, 0xc3, 0xd2,
+	0x01, 0x00, 0x00,
 }

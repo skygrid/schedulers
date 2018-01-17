@@ -1,12 +1,21 @@
 syntax = "proto3";
 
+message Quotum {
+    float ratio = 1;
+    oneof Q {
+        float CPUratio = 10;
+        float GBratio = 11;
+        uint32 CPUabs = 12;
+        uint32 GBabs = 13;
+    }
+}
 message Organization {
     string Name = 1;
-    uint32 Quota = 2;
+    Quotum Quota = 2;
 }
 
 message ResourceVolume {
-    uint64 id = 1;
+    uint64 Id = 1;
     uint32 CPU = 2;
     uint32 GPU = 3;
 
