@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 message Quotum {
-    float ratio = 1;
+    float Ratio = 1;
     oneof Q {
         float CPUratio = 10;
         float GBratio = 11;
