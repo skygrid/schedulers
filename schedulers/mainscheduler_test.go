@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -10,6 +9,9 @@ func checkDecisionsEqual(a []Decision, b []Decision) bool {
 		if !x.Equal(b[i]) {
 			return false
 		}
+	}
+	if len(a) != len(b) {
+		return false
 	}
 	return true
 }
@@ -35,7 +37,8 @@ func TestMainScheduler(t *testing.T) {
 	d := m.Schedule(jobs, workers)
 	d_check := []Decision{{JobIdx: 21, WorkerIdx: 21}, {JobIdx: 12, WorkerIdx: 12}}
 
-	fmt.Println(ToString(d))
+	t.Log(ToString(d_check))
+	t.Log(ToString(d))
 
 	if !checkDecisionsEqual(d, d_check) {
 		t.Fail()
