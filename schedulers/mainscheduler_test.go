@@ -17,16 +17,19 @@ func checkDecisionsEqual(a []Decision, b []Decision) bool {
 func TestMainScheduler(t *testing.T) {
 	m := MainScheduler{}
 
-	// 10% project weight , 40% of CPUhours
-	quota := Quotum{0.1, &Quotum_CPUratio{0.4}}
+	// 100% project weight , 100 CPUhours
+	quota := Quotum{1.0, &Quotum_CpuTimeAbs{100}}
 
 	o1 := Organization{Name: "SHiP", Quota: &quota}
-	rv1 := ResourceVolume{CPU: 2, RAMmb: 1, TimePeriod: 40, Owner: &o1, Id: 21}
-	rv2 := ResourceVolume{CPU: 1, RAMmb: 2, TimePeriod: 40, Owner: &o1, Id: 12}
-	jobs := []ResourceVolume{rv1, rv2}
+
+	job1 := ResourceVolume{CPU: 2, RAMmb: 1, TimePeriod: 40, Owner: &o1, Id: 21}
+	job2 := ResourceVolume{CPU: 1, RAMmb: 2, TimePeriod: 40, Owner: &o1, Id: 12}
+	//collecting
+	jobs := []ResourceVolume{job1, job2}
+
 	worker1 := ResourceVolume{CPU: 1, RAMmb: 2, Id: 12}
 	worker2 := ResourceVolume{CPU: 2, RAMmb: 1, Id: 21}
-
+	//collecting
 	workers := []ResourceVolume{worker1, worker2}
 
 	d := m.Schedule(jobs, workers)
