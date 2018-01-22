@@ -1,12 +1,12 @@
 syntax = "proto3";
 
 message Quotum {
-    float Ratio = 1;
+    float ProjectRatio = 1;
     oneof Q {
-        float CPUratio = 10;
-        float GBratio = 11;
-        uint32 CPUabs = 12;
-        uint32 GBabs = 13;
+        float CpuTimeRatio = 10;
+        float GbRatio = 11;
+        uint64 CpuTimeAbs = 12;
+        uint32 GbAbs = 13;
     }
 }
 message Organization {
@@ -20,9 +20,10 @@ message ResourceVolume {
     uint32 GPU = 3;
 
     uint32 RAMmb = 4;
-    int64 TimePeriod = 5;
+    uint64 TimePeriod = 5;
+    uint32 TemporaryStorageNeededGB = 6;
 
-    Organization Owner = 6;
+    Organization Owner = 7;
 }
 
 message Decision {
