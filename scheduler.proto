@@ -5,8 +5,8 @@ message Quotum {
     oneof Q {
         float CpuTimeRatio = 10;
         float GbRatio = 11;
-        uint64 CpuTimeAbs = 12;
-        uint32 GbAbs = 13;
+        float CpuTimeAbs = 12;
+        float GbAbs = 13;
     }
 }
 message Organization {
@@ -21,7 +21,7 @@ message ResourceVolume {
 
     uint32 RAMmb = 4;
     uint64 TimePeriod = 5;
-    uint32 TemporaryStorageNeededGB = 6;
+    float TemporaryStorageNeededGb = 6;
 
     Organization Owner = 7;
 }
