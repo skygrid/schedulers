@@ -1,8 +1,8 @@
 package scheduler
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 )
 
 type Scheduler interface {
@@ -73,7 +73,7 @@ func (g *GreatScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 		for i, w := range workers {
 			//check availability
 			if (g.checkAvailability(j)) && (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
-				if (g.checkQuota(j, w)) {
+				if g.checkQuota(j, w) {
 					//add allocation decision to result slice
 					d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
 					//kick allocated worker
@@ -97,7 +97,7 @@ func (g *GreatScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 		//seconds to hours
 		timeSecs := uint64(x * 60 * 60)
 		// if quota allows - decrease available
-		if (timeSecs >= job.TimePeriod) {
+		if timeSecs >= job.TimePeriod {
 			//re-assign
 			g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
 				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_CpuTimeAbs{float32(timeSecs-job.TimePeriod) / 3600.0}}}
@@ -109,7 +109,7 @@ func (g *GreatScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 	case *Quotum_GbAbs:
 		x := g.available[job.Owner.Name].Quota.GetGbAbs()
 		// if quota allows - decrease available
-		if (x >= job.TemporaryStorageNeededGb) {
+		if x >= job.TemporaryStorageNeededGb {
 			//re-assign
 			g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
 				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_GbAbs{x - job.TemporaryStorageNeededGb}}}

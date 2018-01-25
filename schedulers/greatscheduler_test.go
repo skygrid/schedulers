@@ -5,7 +5,7 @@ import (
 )
 
 func TestGreatSchedulerCPU_abs(t *testing.T) {
-	LOG_SWITCH:=true
+	LOG_SWITCH := true
 
 	g := GreatScheduler{}
 
@@ -50,7 +50,7 @@ func TestGreatSchedulerCPU_abs(t *testing.T) {
 	}
 }
 func TestGreatSchedulerGB_abs(t *testing.T) {
-	LOG_SWITCH:=false
+	LOG_SWITCH := false
 
 	g := GreatScheduler{}
 
@@ -97,7 +97,7 @@ func TestGreatSchedulerGB_abs(t *testing.T) {
 }
 
 func TestGreatSchedulerGB_abs_complex(t *testing.T) {
-	LOG_SWITCH:=false
+	LOG_SWITCH := false
 
 	g := GreatScheduler{}
 
@@ -151,7 +151,7 @@ func TestGreatSchedulerGB_abs_complex(t *testing.T) {
 }
 
 func TestGreatSchedulerGB_abs_complex2(t *testing.T) {
-	LOG_SWITCH:=false
+	LOG_SWITCH := false
 
 	g := GreatScheduler{}
 
