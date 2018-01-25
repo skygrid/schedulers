@@ -12,7 +12,7 @@ type Scheduler interface {
 func ToString(decisions []Decision) string {
 	var buffer bytes.Buffer
 	for i, d := range decisions {
-		buffer.WriteString(fmt.Sprintf("p#%d JobIdx=%d WorkerIdx=%d ", i, d.JobIdx, d.WorkerIdx))
+		buffer.WriteString(fmt.Sprintf("p#%d J%d W%d ", i, d.JobIdx, d.WorkerIdx))
 	}
 	return buffer.String()
 }
@@ -95,22 +95,26 @@ func (g *GreatScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 	case *Quotum_CpuTimeAbs:
 		x := g.available[job.Owner.Name].Quota.GetCpuTimeAbs()
 		//seconds to hours
-		timeHours := float32(job.TimePeriod * 60 * 60)
+		timeSecs := uint64(x * 60 * 60)
 		// if quota allows - decrease available
-		if !(x >= timeHours) {
+		if (timeSecs >= job.TimePeriod) {
 			//re-assign
 			g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
-				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_CpuTimeAbs{x - timeHours}}}
+				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_CpuTimeAbs{float32(timeSecs-job.TimePeriod) / 3600.0}}}
+		} else {
+			return false
 		}
 	case *Quotum_CpuTimeRatio:
 		return true
 	case *Quotum_GbAbs:
 		x := g.available[job.Owner.Name].Quota.GetGbAbs()
 		// if quota allows - decrease available
-		if !(x >= job.TemporaryStorageNeededGb) {
+		if (x >= job.TemporaryStorageNeededGb) {
 			//re-assign
 			g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
 				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_GbAbs{x - job.TemporaryStorageNeededGb}}}
+		} else {
+			return false
 		}
 	case *Quotum_GbRatio:
 		return true
