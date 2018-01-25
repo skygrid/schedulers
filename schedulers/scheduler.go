@@ -1,30 +1,11 @@
 package scheduler
 
 import (
-	"bytes"
 	"fmt"
 )
 
 type Scheduler interface {
 	Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision
-}
-
-func ToString(decisions []Decision) string {
-	var buffer bytes.Buffer
-	for i, d := range decisions {
-		buffer.WriteString(fmt.Sprintf("p#%d J%d W%d ", i, d.JobIdx, d.WorkerIdx))
-	}
-	return buffer.String()
-}
-
-func (volume ResourceVolume) ToString() string {
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("Id=%d CPU=%d GPU=%d RAM=%d Time=%d Gb=%f Owner %s ", volume.Id, volume.CPU, volume.GPU, volume.RAMmb, volume.TimePeriod, volume.TemporaryStorageNeededGb, volume.Owner))
-	return buffer.String()
-}
-
-func (d Decision) Equal(x Decision) bool {
-	return (d.WorkerIdx == x.WorkerIdx) && (d.JobIdx == x.JobIdx)
 }
 
 type MainScheduler struct {

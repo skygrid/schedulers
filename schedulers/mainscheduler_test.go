@@ -4,18 +4,6 @@ import (
 	"testing"
 )
 
-func checkDecisionsEqual(a []Decision, b []Decision) bool {
-	for i, x := range a {
-		if !x.Equal(b[i]) {
-			return false
-		}
-	}
-	if len(a) != len(b) {
-		return false
-	}
-	return true
-}
-
 func TestMainScheduler(t *testing.T) {
 	m := MainScheduler{}
 

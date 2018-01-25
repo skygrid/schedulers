@@ -31,13 +31,9 @@ func TestGreatSchedulerCPU_abs(t *testing.T) {
 	g.init(jobs)
 
 	if LOG_SWITCH {
-		for _, j := range jobs {
-			t.Log(j.ToString())
-		}
-		for _, w := range workers {
-			t.Log(w.ToString())
-		}
+		t.Log(Logg(jobs, workers))
 	}
+
 	d := g.Schedule(jobs, workers)
 
 	d_check := []Decision{{JobIdx: 1, WorkerIdx: 3}, {JobIdx: 2, WorkerIdx: 4}}
@@ -49,6 +45,7 @@ func TestGreatSchedulerCPU_abs(t *testing.T) {
 		t.Fail()
 	}
 }
+
 func TestGreatSchedulerGB_abs(t *testing.T) {
 	LOG_SWITCH := false
 
@@ -73,13 +70,9 @@ func TestGreatSchedulerGB_abs(t *testing.T) {
 	workers := []ResourceVolume{worker1, worker2}
 
 	if LOG_SWITCH {
-		for _, j := range jobs {
-			t.Log(j.ToString())
-		}
-		for _, w := range workers {
-			t.Log(w.ToString())
-		}
+		t.Log(Logg(jobs, workers))
 	}
+
 	//init project overview
 	g.init(jobs)
 
@@ -128,13 +121,9 @@ func TestGreatSchedulerGB_abs_complex(t *testing.T) {
 	workers := []ResourceVolume{worker1, worker2, worker3, worker4}
 
 	if LOG_SWITCH {
-		for _, j := range jobs {
-			t.Log(j.ToString())
-		}
-		for _, w := range workers {
-			t.Log(w.ToString())
-		}
+		t.Log(Logg(jobs, workers))
 	}
+
 	//init project overview
 	g.init(jobs)
 
@@ -182,12 +171,7 @@ func TestGreatSchedulerGB_abs_complex2(t *testing.T) {
 	workers := []ResourceVolume{worker1, worker2, worker3, worker4}
 
 	if LOG_SWITCH {
-		for _, j := range jobs {
-			t.Log(j.ToString())
-		}
-		for _, w := range workers {
-			t.Log(w.ToString())
-		}
+		t.Log(Logg(jobs, workers))
 	}
 
 	//init project overview
