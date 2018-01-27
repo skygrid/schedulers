@@ -9,6 +9,7 @@ message Quotum {
         float GbAbs = 13;
     }
 }
+
 message Organization {
     string Name = 1;
     Quotum Quota = 2;

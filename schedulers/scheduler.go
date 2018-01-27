@@ -8,11 +8,11 @@ type Scheduler interface {
 	Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision
 }
 
-type MainScheduler struct {
+type GeneralScheduler struct {
 	Scheduler
 }
 
-func (m *MainScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
+func (m *GeneralScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
 	//fcfs
 	d := []Decision{}
 	for _, j := range jobs {
@@ -31,12 +31,12 @@ func (m *MainScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume
 	return d
 }
 
-type GreatScheduler struct {
+type QuotaScheduler struct {
 	Scheduler
 	available map[string]Organization
 }
 
-func (g *GreatScheduler) init(jobs []ResourceVolume) bool {
+func (g *QuotaScheduler) init(jobs []ResourceVolume) bool {
 	if g.available == nil {
 		g.available = make(map[string]Organization)
 	}
@@ -46,7 +46,7 @@ func (g *GreatScheduler) init(jobs []ResourceVolume) bool {
 	return true
 }
 
-func (g *GreatScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
+func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
 	//fcfs adapted
 	d := []Decision{}
 	for _, j := range jobs {
@@ -67,11 +67,11 @@ func (g *GreatScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 	return d
 }
 
-func (g *GreatScheduler) checkAvailability(job ResourceVolume) bool {
+func (g *QuotaScheduler) checkAvailability(job ResourceVolume) bool {
 	return 1.0/float32(len(g.available)) <= job.Owner.Quota.ProjectRatio
 }
 
-func (g *GreatScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) bool {
+func (g *QuotaScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) bool {
 	switch f := job.Owner.Quota.Q.(type) {
 	case *Quotum_CpuTimeAbs:
 		x := g.available[job.Owner.Name].Quota.GetCpuTimeAbs()
