@@ -8,6 +8,8 @@ func TestGreatSchedulerCPU_abs(t *testing.T) {
 	LOG_SWITCH := true
 
 	g := QuotaScheduler{}
+	//init project overview
+	g.init()
 
 	// both 50% project weight , 100 CPUhours
 	quota1 := Quotum{0.5, &Quotum_CpuTimeAbs{100}}
@@ -27,8 +29,7 @@ func TestGreatSchedulerCPU_abs(t *testing.T) {
 	//collecting
 	workers := []ResourceVolume{worker1, worker2}
 
-	//init project overview
-	g.init(jobs)
+	g.update(jobs)
 
 	if LOG_SWITCH {
 		t.Log(Logg(jobs, workers))
@@ -50,6 +51,8 @@ func TestGreatSchedulerGB_abs(t *testing.T) {
 	LOG_SWITCH := false
 
 	g := QuotaScheduler{}
+	//init project overview
+	g.init()
 
 	// both 50% project weight , 1 GB
 	quota1 := Quotum{0.5, &Quotum_GbAbs{1.0}}
@@ -74,7 +77,7 @@ func TestGreatSchedulerGB_abs(t *testing.T) {
 	}
 
 	//init project overview
-	g.init(jobs)
+	g.update(jobs)
 
 	d := g.Schedule(jobs, workers)
 
@@ -93,6 +96,8 @@ func TestGreatSchedulerGB_abs_complex(t *testing.T) {
 	LOG_SWITCH := false
 
 	g := QuotaScheduler{}
+	//init project overview
+	g.init()
 
 	// all 25% project weight
 	quota1 := Quotum{0.25, &Quotum_GbAbs{1.0}}
@@ -124,8 +129,7 @@ func TestGreatSchedulerGB_abs_complex(t *testing.T) {
 		t.Log(Logg(jobs, workers))
 	}
 
-	//init project overview
-	g.init(jobs)
+	g.update(jobs)
 
 	d := g.Schedule(jobs, workers)
 
@@ -143,6 +147,8 @@ func TestGreatSchedulerGB_abs_complex2(t *testing.T) {
 	LOG_SWITCH := false
 
 	g := QuotaScheduler{}
+	//init project overview
+	g.init()
 
 	// all 25% project weight
 	quota1 := Quotum{0.25, &Quotum_GbAbs{1.0}}
@@ -174,8 +180,7 @@ func TestGreatSchedulerGB_abs_complex2(t *testing.T) {
 		t.Log(Logg(jobs, workers))
 	}
 
-	//init project overview
-	g.init(jobs)
+	g.update(jobs)
 
 	d := g.Schedule(jobs, workers)
 

@@ -1,9 +1,9 @@
 package scheduler
 
 import (
-	"testing"
 	"bytes"
 	"fmt"
+	"testing"
 )
 
 func ToString(decisions []Decision) string {

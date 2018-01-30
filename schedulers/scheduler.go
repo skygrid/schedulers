@@ -33,17 +33,39 @@ func (m *GeneralScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVol
 
 type QuotaScheduler struct {
 	Scheduler
-	available map[string]Organization
+	Available       map[string]Organization
+	Counter         map[string]int64
+	CpuHoursCounter map[string]float32
+	GbCounter       map[string]float32
 }
 
-func (g *QuotaScheduler) init(jobs []ResourceVolume) bool {
-	if g.available == nil {
-		g.available = make(map[string]Organization)
+func (g *QuotaScheduler) init() bool {
+	if g.Available == nil {
+		g.Available = make(map[string]Organization)
 	}
-	for _, j := range jobs {
-		g.available[j.Owner.Name] = *j.Owner
+	if g.Counter == nil {
+		g.Counter = make(map[string]int64)
+	}
+	if g.CpuHoursCounter == nil {
+		g.CpuHoursCounter = make(map[string]float32)
+	}
+	if g.GbCounter == nil {
+		g.GbCounter = make(map[string]float32)
 	}
 	return true
+}
+
+func (g *QuotaScheduler) update(jobs []ResourceVolume) bool {
+	for _, j := range jobs {
+		g.Available[j.Owner.Name] = *j.Owner
+	}
+	return true
+}
+
+func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
+	g.Counter[job.Owner.GetName()] = g.Counter[job.Owner.GetName()] + 1
+	g.CpuHoursCounter[job.Owner.GetName()] = g.CpuHoursCounter[job.Owner.GetName()] + float32(job.TimePeriod)/3600.0
+	g.GbCounter[job.Owner.GetName()] = g.GbCounter[job.Owner.GetName()] + job.GetTemporaryStorageNeededGb()
 }
 
 func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
@@ -53,7 +75,7 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 		//first fit
 		for i, w := range workers {
 			//check availability
-			if (g.checkAvailability(j)) && (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
+			if (g.checkProjectRatio(j)) && (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
 				if g.checkQuota(j, w) {
 					//add allocation decision to result slice
 					d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
@@ -67,38 +89,81 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 	return d
 }
 
-func (g *QuotaScheduler) checkAvailability(job ResourceVolume) bool {
-	return 1.0/float32(len(g.available)) <= job.Owner.Quota.ProjectRatio
+func (g *QuotaScheduler) checkProjectRatio(job ResourceVolume) bool {
+	sum := int64(0)
+	mul := int64(0)
+	for _, v := range g.Counter {
+		sum = sum + v
+		mul = mul * v
+	}
+	if (mul == 0) || (float32(g.Counter[job.Owner.GetName()])/float32(sum) <= job.Owner.Quota.GetProjectRatio()) {
+		return true
+	}
+	return false
+}
+
+func (g *QuotaScheduler) checkCpuTimeRatio(job ResourceVolume) bool {
+	sum := float32(0)
+	mul := float32(0)
+	for _, v := range g.CpuHoursCounter {
+		sum = sum + v
+		mul = mul * v
+	}
+	if (mul == 0) || (float32(g.CpuHoursCounter[job.Owner.GetName()])/float32(sum) <= job.Owner.Quota.GetCpuTimeRatio()) {
+		return true
+	}
+	return false
+}
+
+func (g *QuotaScheduler) checkGbRatio(job ResourceVolume) bool {
+	sum := float32(0)
+	mul := float32(0)
+	for _, v := range g.GbCounter {
+		sum = sum + v
+		mul = mul * v
+	}
+	if (mul == 0) || (float32(g.GbCounter[job.Owner.GetName()])/float32(sum) <= job.Owner.Quota.GetGbRatio()) {
+		return true
+	}
+	return false
 }
 
 func (g *QuotaScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) bool {
 	switch f := job.Owner.Quota.Q.(type) {
 	case *Quotum_CpuTimeAbs:
-		x := g.available[job.Owner.Name].Quota.GetCpuTimeAbs()
+		x := g.Available[job.Owner.GetName()].Quota.GetCpuTimeAbs()
 		//seconds to hours
 		timeSecs := uint64(x * 60 * 60)
-		// if quota allows - decrease available
+		// if quota allows - decrease Available
 		if timeSecs >= job.TimePeriod {
 			//re-assign
-			g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
-				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_CpuTimeAbs{float32(timeSecs-job.TimePeriod) / 3600.0}}}
+			g.Available[job.Owner.GetName()] = Organization{job.Owner.GetName(), &Quotum{
+				g.Available[job.Owner.GetName()].Quota.GetProjectRatio(), &Quotum_CpuTimeAbs{float32(timeSecs-job.GetTimePeriod()) / 3600.0}}}
+			g.incrementCounters(job)
 		} else {
 			return false
 		}
 	case *Quotum_CpuTimeRatio:
-		return true
+		if g.checkCpuTimeRatio(job) {
+			return true
+		}
+		return false
 	case *Quotum_GbAbs:
-		x := g.available[job.Owner.Name].Quota.GetGbAbs()
-		// if quota allows - decrease available
-		if x >= job.TemporaryStorageNeededGb {
+		x := g.Available[job.Owner.GetName()].Quota.GetGbAbs()
+		// if quota allows - decrease Available
+		if x >= job.GetTemporaryStorageNeededGb() {
 			//re-assign
-			g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
-				g.available[job.Owner.Name].Quota.GetProjectRatio(), &Quotum_GbAbs{x - job.TemporaryStorageNeededGb}}}
+			g.Available[job.Owner.GetName()] = Organization{job.Owner.GetName(), &Quotum{
+				g.Available[job.Owner.GetName()].Quota.GetProjectRatio(), &Quotum_GbAbs{x - job.GetTemporaryStorageNeededGb()}}}
+			g.incrementCounters(job)
 		} else {
 			return false
 		}
 	case *Quotum_GbRatio:
-		return true
+		if g.checkGbRatio(job) {
+			return true
+		}
+		return false
 	case nil:
 		fmt.Errorf("owner.Quota The field is not set. %T", f)
 		return false
@@ -106,9 +171,5 @@ func (g *QuotaScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 		fmt.Errorf("owner.Quota has unexpected type %T", f)
 		return false
 	}
-	//re-assign due to
-	x := 1.0 / float32(len(g.available))
-	g.available[job.Owner.Name] = Organization{job.Owner.Name, &Quotum{
-		g.available[job.Owner.Name].Quota.GetProjectRatio() - x, job.Owner.Quota.Q}}
 	return true
 }
