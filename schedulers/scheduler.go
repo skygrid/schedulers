@@ -163,7 +163,7 @@ func (g *QuotaScheduler) checkGbRatio(job ResourceVolume) bool {
 	fmt.Println(mul)
 	fmt.Println(x)
 
-	if (mul == 0) || ( x <= job.Owner.Quota.GetGbRatio()) {
+	if (mul == 0) || (x <= job.Owner.Quota.GetGbRatio()) {
 		return true
 	}
 	return false

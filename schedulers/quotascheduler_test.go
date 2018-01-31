@@ -241,7 +241,6 @@ func TestQoutaSchedulerGB_ratio_1(t *testing.T) {
 	}
 }
 
-
 func TestQoutaSchedulerGB_ratio_2(t *testing.T) {
 	LOG_SWITCH := true
 
@@ -298,6 +297,7 @@ func TestQoutaSchedulerGB_ratio_2(t *testing.T) {
 		t.Fail()
 	}
 }
+
 /*
 func TestQoutaSchedulerGB_ratio_complex(t *testing.T) {
 	LOG_SWITCH := true
