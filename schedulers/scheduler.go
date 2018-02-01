@@ -79,7 +79,7 @@ func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
 	g.CpuHoursCounter[job.Owner.GetName()] += cpuHours
 	g.RamMbHoursCounter[job.Owner.GetName()] += ramMbHours
 
-	switch _ := job.Owner.Quota.Q.(type) {
+	switch job.Owner.Quota.Q.(type) {
 	case *Quotum_CpuHoursAbs:
 		g.Available[job.Owner.GetName()] = Organization{job.Owner.GetName(), &Quotum{
 			g.Available[job.Owner.GetName()].Quota.GetProjectRatio(),
@@ -108,36 +108,41 @@ func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
 func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
 	//fcfs adapted
 	d := []Decision{}
+	scheduledJobs := []ResourceVolume{}
 	prFlag := g.checkProjectsInJobList(jobs)
+	n:=len(jobs)
+	allocatedflag:= false
 	for _, j := range jobs {
 		//first fit
 		for wIx, w := range workers {
 			//check availability
 			if (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
 				if prFlag {
-					if g.checkProjectRatio(j) {
-						if g.checkQuota(j, w) {
-							//add allocation decision to result slice
-							d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
-							//kick allocated worker
-							workers = append(workers[:wIx], workers[wIx+1:]...)
-							break
-						}
+					if g.checkProjectRatio(j) && g.checkQuota(j, w) {
+						//add allocation decision to result slice
+						d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
+						scheduledJobs = append(scheduledJobs, j)
+						//kick allocated worker
+						workers = append(workers[:wIx], workers[wIx+1:]...)
+						jobs = append(jobs[:jIx], jobs[jIx+1:]...)
+						//change variable of length
+						n--
+						//set flag true
+						allocatedflag = true
+						break
 					}
 				} else {
 					//add allocation decision to result slice
 					d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
+					scheduledJobs = append(scheduledJobs, j)
 					//kick allocated worker
 					workers = append(workers[:wIx], workers[wIx+1:]...)
 					break
 				}
 			}
-
 		}
 	}
-	//TODO: code here
-	//decrease qouta
-	//g.updateQuota(d)
+	g.updateQuota(scheduledJobs)
 	return d
 }
 
@@ -149,11 +154,6 @@ func (g *QuotaScheduler) checkProjectRatio(job ResourceVolume) bool {
 		mul = mul * v
 	}
 	x := float32(g.Counter[job.Owner.GetName()]) / float32(sum)
-	fmt.Println("PPP")
-	fmt.Println(sum)
-	fmt.Println(mul)
-	fmt.Println(x)
-	fmt.Println()
 	if (mul == 0) || (x <= job.Owner.Quota.GetProjectRatio()) {
 		return true
 	}
@@ -204,9 +204,10 @@ func (g *QuotaScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 	return false
 }
 
-func (g *QuotaScheduler) updateQuota(jobs []ResourceVolume, decisions []Decision) bool {
-	//TODO: code here
-	return false
+func (g *QuotaScheduler) updateQuota(jobs []ResourceVolume) {
+	for _, j := range jobs {
+		g.incrementCounters(j)
+	}
 }
 
 func (g *QuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
@@ -214,10 +215,9 @@ func (g *QuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
 	retVal := false
 	flag := false
 	for Akey, _ := range g.Available {
-		for jIx, j := range jobs {
+		for _, j := range jobs {
 			if j.Owner.GetName() == Akey {
 				flag = true
-				jobs = append(jobs[:jIx], jobs[jIx+1:]...)
 				break
 			}
 		}
@@ -231,6 +231,5 @@ func (g *QuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
 	} else {
 		retVal = true
 	}
-	fmt.Println("checkProjectsInJobList")
 	return retVal
 }

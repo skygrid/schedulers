@@ -53,7 +53,7 @@ func TestMainScheduler(t *testing.T) {
 	m := GeneralScheduler{}
 
 	// 100% project weight , 100 CPUhours
-	quota := Quotum{1.0, &Quotum_CpuTimeAbs{100}}
+	quota := Quotum{1.0, &Quotum_CpuHoursAbs{100}}
 
 	o1 := Organization{Name: "SHiP", Quota: &quota}
 
