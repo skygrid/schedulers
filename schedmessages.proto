@@ -3,10 +3,12 @@ syntax = "proto3";
 message Quotum {
     float ProjectRatio = 1;
     oneof Q {
-        float CpuTimeRatio = 10;
+        float CpuHoursRatio = 10;
         float GbRatio = 11;
-        float CpuTimeAbs = 12;
+        float CpuHoursAbs = 12;
         float GbAbs = 13;
+        float RamHoursAbs = 14;
+        float RamHoursRatio = 15;
     }
 }
 
