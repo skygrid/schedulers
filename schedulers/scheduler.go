@@ -110,11 +110,15 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 	d := []Decision{}
 	scheduledJobs := []ResourceVolume{}
 	prFlag := g.checkProjectsInJobList(jobs)
-	n:=len(jobs)
-	allocatedflag:= false
-	for _, j := range jobs {
+	n := len(jobs)
+	allocatedFlag := false
+	exitFlag := false
+	jIx := 0
+	for (jIx < n) && !exitFlag {
+		j := jobs[jIx]
 		//first fit
 		for wIx, w := range workers {
+			fmt.Printf("J%d W%d; ", j.Id, w.Id)
 			//check availability
 			if (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
 				if prFlag {
@@ -122,27 +126,54 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 						//add allocation decision to result slice
 						d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
 						scheduledJobs = append(scheduledJobs, j)
-						//kick allocated worker
+						//kick allocated worker and job
 						workers = append(workers[:wIx], workers[wIx+1:]...)
 						jobs = append(jobs[:jIx], jobs[jIx+1:]...)
 						//change variable of length
 						n--
 						//set flag true
-						allocatedflag = true
+						allocatedFlag = true
+						//update counters
+						g.incrementCounters(j)
 						break
 					}
 				} else {
 					//add allocation decision to result slice
 					d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
 					scheduledJobs = append(scheduledJobs, j)
-					//kick allocated worker
+					//kick allocated worker and job
 					workers = append(workers[:wIx], workers[wIx+1:]...)
+					jobs = append(jobs[:jIx], jobs[jIx+1:]...)
+					//change variable of length
+					n--
+					//set flag true
+					allocatedFlag = true
+					//update counters
+					g.incrementCounters(j)
 					break
 				}
 			}
+			//if it was last worker go to next job
+			if wIx == len(workers)-1 {
+				jIx++
+				fmt.Println(jIx)
+			}
+		}
+		//if it was the last job - we could iterate it over again
+		if jIx == n-1 {
+			if allocatedFlag {
+				exitFlag = false
+				allocatedFlag = false
+				jIx = 0
+			} else {
+				exitFlag = true
+			}
+		}
+		//if there is no workers - quit
+		if len(workers) == 0 {
+			exitFlag = true
 		}
 	}
-	g.updateQuota(scheduledJobs)
 	return d
 }
 
@@ -160,10 +191,12 @@ func (g *QuotaScheduler) checkProjectRatio(job ResourceVolume) bool {
 	return false
 }
 
-func (g *QuotaScheduler) checkCpuTimeRatio(job ResourceVolume) bool {
+//TODO: implement
+func (g *QuotaScheduler) checkCpuHoursRatio(job ResourceVolume) bool {
 	return false
 }
 
+//TODO: implement
 func (g *QuotaScheduler) checkGbRatio(job ResourceVolume) bool {
 	return false
 }

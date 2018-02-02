@@ -4,6 +4,21 @@ import (
 	"testing"
 )
 
+func NewDecision(jIx, wIx uint64) *Decision {
+	return &Decision{JobIdx: jIx, WorkerIdx: wIx}
+
+}
+func checkDecisions(toCheck []Decision, checkTo map[uint64]uint64, t *testing.T) bool {
+	t.Log(ToString(toCheck))
+	t.Log(checkTo)
+	for _, decision := range toCheck {
+		if decision.WorkerIdx != checkTo[decision.JobIdx] {
+			return false
+		}
+	}
+	return true
+}
+
 func TestGreatSchedulerCpuHoursAbs(t *testing.T) {
 	LOG_SWITCH := false
 
@@ -64,8 +79,8 @@ func TestGreatSchedulerCpuHoursAbs_2(t *testing.T) {
 	job1 := ResourceVolume{CPU: 1, TimePeriod: 100, Owner: &o1, Id: 1}
 	job2 := ResourceVolume{CPU: 1, TimePeriod: 900, Owner: &o2, Id: 2}
 	job3 := ResourceVolume{CPU: 1, TimePeriod: 100, Owner: &o1, Id: 3}
-	job5 := ResourceVolume{CPU: 1, TimePeriod: 100, Owner: &o1, Id: 4}
-	job4 := ResourceVolume{CPU: 1, TimePeriod: 900, Owner: &o2, Id: 5}
+	job5 := ResourceVolume{CPU: 1, TimePeriod: 100, Owner: &o1, Id: 5}
+	job4 := ResourceVolume{CPU: 1, TimePeriod: 900, Owner: &o2, Id: 4}
 	job6 := ResourceVolume{CPU: 1, TimePeriod: 900, Owner: &o2, Id: 6}
 	job7 := ResourceVolume{CPU: 1, TimePeriod: 100, Owner: &o1, Id: 7}
 	job8 := ResourceVolume{CPU: 1, TimePeriod: 900, Owner: &o2, Id: 8}
@@ -78,9 +93,8 @@ func TestGreatSchedulerCpuHoursAbs_2(t *testing.T) {
 	worker3 := ResourceVolume{CPU: 2, Id: 13}
 	worker4 := ResourceVolume{CPU: 2, Id: 14}
 	worker5 := ResourceVolume{CPU: 2, Id: 15}
-	worker6 := ResourceVolume{CPU: 2, Id: 16}
 	//collecting
-	workers := []ResourceVolume{worker1, worker2, worker3, worker4, worker5, worker6}
+	workers := []ResourceVolume{worker1, worker2, worker3, worker4, worker5}
 
 	g.update(jobs)
 
@@ -89,13 +103,14 @@ func TestGreatSchedulerCpuHoursAbs_2(t *testing.T) {
 	}
 
 	d := g.Schedule(jobs, workers)
+	d_check := make(map[uint64]uint64)
+	d_check[1] = 11
+	d_check[2] = 12
+	d_check[3] = 13
+	d_check[5] = 14
+	d_check[7] = 15
 
-	d_check := []Decision{{JobIdx: 1, WorkerIdx: 3}, {JobIdx: 2, WorkerIdx: 4}}
-
-	t.Log(ToString(d_check))
-	t.Log(ToString(d))
-
-	if !checkDecisionsEqual(d, d_check) {
+	if !checkDecisions(d, d_check, t) {
 		t.Fail()
 	}
 }
