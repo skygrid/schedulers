@@ -197,6 +197,11 @@ func (g *QuotaScheduler) checkCpuHoursRatio(job ResourceVolume) bool {
 }
 
 //TODO: implement
+func (g *QuotaScheduler) checkRamMbHoursRatio(job ResourceVolume) bool {
+	return false
+}
+
+//TODO: implement
 func (g *QuotaScheduler) checkGbRatio(job ResourceVolume) bool {
 	return false
 }
@@ -235,12 +240,6 @@ func (g *QuotaScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 		return false
 	}
 	return false
-}
-
-func (g *QuotaScheduler) updateQuota(jobs []ResourceVolume) {
-	for _, j := range jobs {
-		g.incrementCounters(j)
-	}
 }
 
 func (g *QuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
