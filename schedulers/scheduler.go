@@ -86,7 +86,6 @@ func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
 			&Quotum_CpuHoursAbs{g.Available[job.Owner.GetName()].Quota.GetCpuHoursAbs() - cpuHours}}}
 		break
 	case *Quotum_CpuHoursRatio:
-		//fmt.Println("not implemented")
 		break
 	case *Quotum_GbAbs:
 		fmt.Println("not implemented")
@@ -100,7 +99,6 @@ func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
 			&Quotum_RamHoursAbs{g.Available[job.Owner.GetName()].Quota.GetRamHoursAbs() - ramMbHours}}}
 		break
 	case *Quotum_RamHoursRatio:
-		fmt.Println("not implemented")
 		break
 	}
 }
@@ -108,7 +106,6 @@ func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
 func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
 	//fcfs adapted
 	d := []Decision{}
-	scheduledJobs := []ResourceVolume{}
 	prFlag := g.checkProjectsInJobList(jobs)
 	n := len(jobs)
 	allocatedFlag := false
@@ -128,7 +125,6 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 					if g.checkProjectRatio(j) && g.checkQuota(j, w) {
 						//add allocation decision to result slice
 						d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
-						scheduledJobs = append(scheduledJobs, j)
 						//kick allocated worker and job
 						workers = append(workers[:wIx], workers[wIx+1:]...)
 						jobs = append(jobs[:jIx], jobs[jIx+1:]...)
@@ -145,7 +141,6 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 				} else { //ignore quotas
 					//add allocation decision to result slice
 					d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
-					scheduledJobs = append(scheduledJobs, j)
 					//kick allocated worker and job
 					workers = append(workers[:wIx], workers[wIx+1:]...)
 					jobs = append(jobs[:jIx], jobs[jIx+1:]...)
