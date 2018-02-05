@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+//TODO delete
 func NewDecision(jIx, wIx uint64) *Decision {
 	return &Decision{JobIdx: jIx, WorkerIdx: wIx}
 
@@ -11,8 +12,14 @@ func NewDecision(jIx, wIx uint64) *Decision {
 func checkDecisions(toCheck []Decision, checkTo map[uint64]uint64, t *testing.T) bool {
 	t.Log(ToString(toCheck))
 	t.Log(checkTo)
-	for _, decision := range toCheck {
-		if decision.WorkerIdx != checkTo[decision.JobIdx] {
+	//from array to map
+	keys := make(map[uint64]uint64)
+	for _, v := range toCheck {
+		keys[v.JobIdx] = v.WorkerIdx
+	}
+
+	for jIdx, wIdx := range checkTo {
+		if wIdx != keys[jIdx] {
 			return false
 		}
 	}
@@ -58,6 +65,183 @@ func TestGreatSchedulerCpuHoursAbs(t *testing.T) {
 	t.Log(ToString(d))
 
 	if !checkDecisionsEqual(d, d_check) {
+		t.Fail()
+	}
+}
+
+func TestGreatSchedulerCpuHoursRatio(t *testing.T) {
+	LOG_SWITCH := false
+
+	g := QuotaScheduler{}
+	//init project overview
+	g.init()
+
+	// both 50% project weight , 100 CPUhours
+	quota1 := Quotum{0.5, &Quotum_CpuHoursRatio{0.8}}
+	quota2 := Quotum{0.5, &Quotum_CpuHoursRatio{0.2}}
+
+	o1 := Organization{Name: "SHiP", Quota: &quota1}
+	o2 := Organization{Name: "Monte_carlo", Quota: &quota2}
+
+	job1 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 1}
+	job2 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 2}
+	job3 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 3}
+	job5 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 5}
+	job4 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 4}
+	job6 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 6}
+	job7 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 7}
+	job8 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 8}
+
+	//collecting
+	jobs := []ResourceVolume{job1, job2, job3, job4, job5, job6, job7, job8}
+
+	worker1 := ResourceVolume{CPU: 2, Id: 11}
+	worker2 := ResourceVolume{CPU: 2, Id: 12}
+	worker3 := ResourceVolume{CPU: 2, Id: 13}
+	worker4 := ResourceVolume{CPU: 2, Id: 14}
+	worker5 := ResourceVolume{CPU: 2, Id: 15}
+	//collecting
+	workers := []ResourceVolume{worker1, worker2, worker3, worker4, worker5}
+
+	g.update(jobs)
+
+	if LOG_SWITCH {
+		t.Log(Logg(jobs, workers))
+	}
+
+	d := g.Schedule(jobs, workers)
+
+	d_check := make(map[uint64]uint64)
+	d_check[1] = 11
+	d_check[2] = 12
+	d_check[4] = 13
+	d_check[3] = 14
+	d_check[6] = 15
+
+	if !checkDecisions(d, d_check, t) {
+		t.Fail()
+	}
+}
+
+func TestGreatSchedulerCpuHoursRatio_2(t *testing.T) {
+	LOG_SWITCH := false
+
+	g := QuotaScheduler{}
+	//init project overview
+	g.init()
+
+	// both 50% project weight , 100 CPUhours
+	quota1 := Quotum{0.5, &Quotum_CpuHoursRatio{0.8}}
+	quota2 := Quotum{0.5, &Quotum_CpuHoursRatio{0.2}}
+
+	o1 := Organization{Name: "SHiP", Quota: &quota1}
+	o2 := Organization{Name: "Monte_carlo", Quota: &quota2}
+
+	job1 := ResourceVolume{CPU: 2, TimePeriod: 200, Owner: &o1, Id: 1}
+	job2 := ResourceVolume{CPU: 1, TimePeriod: 400, Owner: &o2, Id: 2}
+	job3 := ResourceVolume{CPU: 2, TimePeriod: 200, Owner: &o1, Id: 3}
+	job5 := ResourceVolume{CPU: 2, TimePeriod: 200, Owner: &o1, Id: 5}
+	job4 := ResourceVolume{CPU: 1, TimePeriod: 400, Owner: &o2, Id: 4}
+	job6 := ResourceVolume{CPU: 1, TimePeriod: 400, Owner: &o2, Id: 6}
+	job7 := ResourceVolume{CPU: 2, TimePeriod: 200, Owner: &o1, Id: 7}
+	job8 := ResourceVolume{CPU: 1, TimePeriod: 400, Owner: &o2, Id: 8}
+
+	//collecting
+	jobs := []ResourceVolume{job1, job2, job3, job4, job5, job6, job7, job8}
+
+	worker1 := ResourceVolume{CPU: 2, Id: 11}
+	worker2 := ResourceVolume{CPU: 2, Id: 12}
+	worker3 := ResourceVolume{CPU: 2, Id: 13}
+	worker4 := ResourceVolume{CPU: 2, Id: 14}
+	worker5 := ResourceVolume{CPU: 2, Id: 15}
+	//collecting
+	workers := []ResourceVolume{worker1, worker2, worker3, worker4, worker5}
+
+	g.update(jobs)
+
+	if LOG_SWITCH {
+		t.Log(Logg(jobs, workers))
+	}
+
+	d := g.Schedule(jobs, workers)
+
+	d_check := make(map[uint64]uint64)
+	d_check[1] = 11
+	d_check[2] = 12
+	d_check[3] = 13
+	d_check[4] = 14
+	d_check[5] = 15
+
+	if !checkDecisions(d, d_check, t) {
+		t.Fail()
+	}
+}
+
+func TestGreatSchedulerCpuHoursRatio_3(t *testing.T) {
+	LOG_SWITCH := false
+
+	g := QuotaScheduler{}
+	//init project overview
+	g.init()
+
+	// both 50% project weight , 100 CPUhours
+	quota1 := Quotum{0.5, &Quotum_CpuHoursRatio{0.8}}
+	quota2 := Quotum{0.5, &Quotum_CpuHoursRatio{0.2}}
+
+	o1 := Organization{Name: "SHiP", Quota: &quota1}
+	o2 := Organization{Name: "Monte_carlo", Quota: &quota2}
+
+	job1 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 1}
+	job2 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 2}
+	job3 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 3}
+	job5 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 5}
+	job4 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 4}
+	job6 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 6}
+	job7 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 7}
+	job8 := ResourceVolume{CPU: 1, TimePeriod: 90, Owner: &o2, Id: 8}
+
+	//collecting
+	jobs := []ResourceVolume{job1, job2, job3, job4, job5, job6, job7, job8}
+
+	worker1 := ResourceVolume{CPU: 2, Id: 11}
+	worker2 := ResourceVolume{CPU: 2, Id: 12}
+	worker3 := ResourceVolume{CPU: 2, Id: 13}
+	worker4 := ResourceVolume{CPU: 2, Id: 14}
+	worker5 := ResourceVolume{CPU: 2, Id: 15}
+	//collecting
+	workers := []ResourceVolume{worker1, worker2, worker3, worker4, worker5}
+
+	g.update(jobs)
+
+	d := g.Schedule(jobs, workers)
+
+	d_check := make(map[uint64]uint64)
+	d_check[1] = 11
+	d_check[2] = 12
+	d_check[4] = 13
+	d_check[3] = 14
+	d_check[6] = 15
+
+	if !checkDecisions(d, d_check, t) {
+		t.Fail()
+	}
+
+	jobs = []ResourceVolume{job1, job3, job5, job7}
+	workers = []ResourceVolume{worker1, worker2, worker3, worker4, worker5}
+
+	if LOG_SWITCH {
+		t.Log(Logg(jobs, workers))
+	}
+
+	d = g.Schedule(jobs, workers)
+
+	d_check = make(map[uint64]uint64)
+	d_check[1] = 11
+	d_check[3] = 12
+	d_check[5] = 13
+	d_check[7] = 14
+
+	if !checkDecisions(d, d_check, t) {
 		t.Fail()
 	}
 }

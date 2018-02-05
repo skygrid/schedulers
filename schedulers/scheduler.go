@@ -86,7 +86,7 @@ func (g *QuotaScheduler) incrementCounters(job ResourceVolume) {
 			&Quotum_CpuHoursAbs{g.Available[job.Owner.GetName()].Quota.GetCpuHoursAbs() - cpuHours}}}
 		break
 	case *Quotum_CpuHoursRatio:
-		fmt.Println("not implemented")
+		//fmt.Println("not implemented")
 		break
 	case *Quotum_GbAbs:
 		fmt.Println("not implemented")
@@ -113,15 +113,18 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 	n := len(jobs)
 	allocatedFlag := false
 	exitFlag := false
+	fitFlag := false
+	manualFlag := true
 	jIx := 0
 	for (jIx < n) && !exitFlag {
 		j := jobs[jIx]
 		//first fit
 		for wIx, w := range workers {
 			fmt.Printf("J%d W%d; ", j.Id, w.Id)
-			//check availability
+			//check if certain job fits certain worker
 			if (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
-				if prFlag {
+				fitFlag = true
+				if prFlag && manualFlag {
 					if g.checkProjectRatio(j) && g.checkQuota(j, w) {
 						//add allocation decision to result slice
 						d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
@@ -135,9 +138,11 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 						allocatedFlag = true
 						//update counters
 						g.incrementCounters(j)
+						fmt.Println(g.Counter)
+						fmt.Println(g.CpuHoursCounter)
 						break
 					}
-				} else {
+				} else { //ignore quotas
 					//add allocation decision to result slice
 					d = append(d, Decision{JobIdx: j.Id, WorkerIdx: w.Id})
 					scheduledJobs = append(scheduledJobs, j)
@@ -150,6 +155,11 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 					allocatedFlag = true
 					//update counters
 					g.incrementCounters(j)
+					fmt.Println(g.Counter)
+					fmt.Println(g.CpuHoursCounter)
+					if !manualFlag {
+						manualFlag = true
+					}
 					break
 				}
 			}
@@ -159,8 +169,13 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 				fmt.Println(jIx)
 			}
 		}
+		//if there is no workers - quit
+		if len(workers) == 0 {
+			exitFlag = true
+			break
+		}
 		//if it was the last job - we could iterate it over again
-		if jIx == n-1 {
+		if jIx >= n {
 			if allocatedFlag {
 				exitFlag = false
 				allocatedFlag = false
@@ -168,10 +183,13 @@ func (g *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 			} else {
 				exitFlag = true
 			}
-		}
-		//if there is no workers - quit
-		if len(workers) == 0 {
-			exitFlag = true
+			if exitFlag && fitFlag {
+				exitFlag = false
+				manualFlag = false
+				fitFlag = false
+				allocatedFlag = false
+				jIx = 0
+			}
 		}
 	}
 	return d
@@ -191,13 +209,33 @@ func (g *QuotaScheduler) checkProjectRatio(job ResourceVolume) bool {
 	return false
 }
 
-//TODO: implement
+//TODO: check
 func (g *QuotaScheduler) checkCpuHoursRatio(job ResourceVolume) bool {
+	sum := float32(0)
+	mul := float32(1)
+	for _, v := range g.CpuHoursCounter {
+		sum = sum + v
+		mul = mul * v
+	}
+	x := float32(g.CpuHoursCounter[job.Owner.GetName()]) / float32(sum)
+	if (mul == 0) || (x <= job.Owner.Quota.GetCpuHoursRatio()) {
+		return true
+	}
 	return false
 }
 
-//TODO: implement
+//TODO: check
 func (g *QuotaScheduler) checkRamMbHoursRatio(job ResourceVolume) bool {
+	sum := float32(0)
+	mul := float32(1)
+	for _, v := range g.RamMbHoursCounter {
+		sum = sum + v
+		mul = mul * v
+	}
+	x := float32(g.RamMbHoursCounter[job.Owner.GetName()]) / float32(sum)
+	if (mul == 0) || (x <= job.Owner.Quota.GetRamHoursAbs()) {
+		return true
+	}
 	return false
 }
 
@@ -215,7 +253,9 @@ func (g *QuotaScheduler) checkQuota(job ResourceVolume, worker ResourceVolume) b
 		}
 		return false
 	case *Quotum_CpuHoursRatio:
-		fmt.Println("not implemented")
+		if g.checkCpuHoursRatio(job) {
+			return true
+		}
 		return false
 	case *Quotum_GbAbs:
 		fmt.Println("not implemented")
