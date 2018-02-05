@@ -4,6 +4,12 @@ For contibuting use the [protobuf](https://github.com/golang/protobuf) lib
 
 Project overview
 ----
+There are users grouped into project groups, 
+each group has their own quota per day, also per resource; 
+planner switches on when: 
+1) some tasks were just ended; 
+2) there is a new task arrived, it’s necessary to compute them and there is free resources available.
+
 Library consists of two general parts: 
 the **protobuf library messages description** and
 the **implemented Go library**
