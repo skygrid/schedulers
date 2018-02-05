@@ -1,6 +1,8 @@
 package scheduler
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Scheduler interface {
 	Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision
@@ -8,6 +10,19 @@ type Scheduler interface {
 
 type GeneralScheduler struct {
 	Scheduler
+}
+
+type SimpleQuotaScheduler struct {
+	Scheduler
+	Counter           map[string]int64
+	Quotas            map[string]*Quotum
+	CpuHoursCounter   map[string]float32
+	GbCounter         map[string]float32
+	RamMbHoursCounter map[string]float32
+}
+
+type QuotaScheduler struct {
+	SimpleQuotaScheduler
 }
 
 func (m *GeneralScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
@@ -29,33 +44,20 @@ func (m *GeneralScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVol
 	return d
 }
 
-type SimpleQuotaScheduler struct {
-	Scheduler
-	Counter           map[string]int64
-	Quotas            map[string]*Quotum
-	CpuHoursCounter   map[string]float32
-	GbCounter         map[string]float32
-	RamMbHoursCounter map[string]float32
-}
-
-func (m *SimpleQuotaScheduler) Schedule(jobs []ResourceVolume, w ResourceVolume) Decision {
+func (m *SimpleQuotaScheduler) ScheduleOne(jobs []ResourceVolume, w ResourceVolume) (decision Decision, editedJobs []ResourceVolume) {
 	prFlag := m.checkProjectsInJobList(jobs)
-	for _, j := range jobs {
+	for jIx, j := range jobs {
 		m.update(j)
 		if (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
-			if prFlag {
-				if m.checkQuota(j) && m.checkProjectQouta(j) {
-					m.incrementCounters(j)
-					return Decision{JobIdx: j.Id, WorkerIdx: w.Id}
-				}
-			} else {
+			if m.checkQuota(j, prFlag) && m.checkProjectQouta(j, prFlag) {
 				m.incrementCounters(j)
-				return Decision{JobIdx: j.Id, WorkerIdx: w.Id}
+				//kick allocated job
+				jobs = append(jobs[:jIx], jobs[jIx+1:]...)
+				return Decision{JobIdx: j.Id, WorkerIdx: w.Id}, jobs
 			}
-
 		}
 	}
-	return Decision{}
+	return Decision{}, jobs
 }
 
 func (m *SimpleQuotaScheduler) init() {
@@ -108,7 +110,7 @@ func (g *SimpleQuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) boo
 	return true
 }
 
-func (m *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume) bool {
+func (m *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume, prFlag bool) bool {
 	sum := int64(0)
 	mul := int64(1)
 	for _, v := range m.Counter {
@@ -122,7 +124,7 @@ func (m *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume) bool {
 	return false
 }
 
-func (g *SimpleQuotaScheduler) checkQuota(job ResourceVolume) bool {
+func (g *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) bool {
 	name := job.Owner.GetName()
 	switch f := job.Owner.Quota.Q.(type) {
 	case *Quotum_CpuHoursAbs:
@@ -167,4 +169,14 @@ func (m *SimpleQuotaScheduler) incrementCounters(job ResourceVolume) {
 	m.GbCounter[job.Owner.GetName()] += 1
 	m.CpuHoursCounter[job.Owner.GetName()] += cpuHours
 	m.RamMbHoursCounter[job.Owner.GetName()] += ramMbHours
+}
+
+func (q *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
+	var d []Decision
+	var decision Decision
+	for _, worker := range workers {
+		decision, jobs = q.ScheduleOne(jobs, worker)
+		d = append(d, decision)
+	}
+	return d
 }
