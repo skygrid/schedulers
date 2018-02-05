@@ -5,7 +5,6 @@ import (
 )
 
 func DecisionsEqual(a Decision, b Decision) bool {
-
 	if a.JobIdx == b.JobIdx && a.WorkerIdx == b.WorkerIdx {
 		return true
 	}
