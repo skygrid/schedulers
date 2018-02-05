@@ -55,11 +55,11 @@ Library usage
 ---
 Create two projects (50% weight both) and one job for each and only 1 worker 
 ```
-quota1 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
-quota2 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
+sqs := SimpleQuotaScheduler{}
+sqs.init()
 
-o1 := Organization{Name: "SHiP", Quota: &quota1}
-o2 := Organization{Name: "Monte_carlo", Quota: &quota2}
+o1 := Organization{Name: "SHiP", Quota: &Quotum{0.5, &Quotum_CpuHoursAbs{100}}
+o2 := Organization{Name: "Monte_carlo", Quota: &Quotum{0.5, &Quotum_CpuHoursAbs{100}}}
 
 job1 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 1}
 job2 := ResourceVolume{CPU: 3, TimePeriod: 900, Owner: &o2, Id: 2}
@@ -68,5 +68,5 @@ jobs := []ResourceVolume{job1, job2}
 
 worker := ResourceVolume{CPU: 3, Id: 10}
 
-d1 := sqs.Schedule(jobs, worker)
+d := sqs.Schedule(jobs, worker)
 ```
