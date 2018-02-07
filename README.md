@@ -60,7 +60,7 @@ Generate client-library using `./gen.sh` and move the generated `schedmessages.p
 
 Library usage
 ---
-Create two projects (50% weight both) and one job for each and only 1 worker 
+Create two projects (50% weight both and 100 CPU-hours per day) and one job for each and only 1 worker 
 ```
 qs := QuotaScheduler{}
 qs.init()

@@ -186,3 +186,54 @@ func Test_4(t *testing.T) {
 	}
 	t.Log(qs.Counter)
 }
+
+func Test_5(t *testing.T) {
+	qs := QuotaScheduler{}
+	qs.init()
+
+	// both 50% project weight , 1500 RAMhours
+	quota1 := Quotum{0.5, &Quotum_CpuHoursRatio{0.2}}
+	quota2 := Quotum{0.5, &Quotum_CpuHoursRatio{0.8}}
+
+	o1 := Organization{Name: "SHiP", Quota: &quota1}
+	o2 := Organization{Name: "Monte_carlo", Quota: &quota2}
+
+	job1 := ResourceVolume{CPU: 2, TimePeriod: 1000, Owner: &o1, Id: 1}
+	job2 := ResourceVolume{CPU: 3, TimePeriod: 900, Owner: &o2, Id: 2}
+
+	//collecting
+	jobs1 := []ResourceVolume{job1, job2}
+
+	worker1 := ResourceVolume{CPU: 2, Id: 10}
+	worker2 := ResourceVolume{CPU: 3, Id: 11}
+
+	workers := []ResourceVolume{worker1, worker2}
+
+	d1 := qs.Schedule(jobs1, workers)
+	decisions1 := []Decision{{JobIdx: 1, WorkerIdx: 10}, {JobIdx: 2, WorkerIdx: 11}}
+
+	if !checkDecisionsEqual(d1, decisions1) {
+		t.Fail()
+	}
+	t.Log(qs.Counter)
+
+	jobs2 := []ResourceVolume{job1, job2}
+	workers2 := []ResourceVolume{worker2}
+	d2 := qs.Schedule(jobs2, workers2)
+	decision2 := Decision{JobIdx: 2, WorkerIdx: 11}
+
+	if !DecisionsEqual(d2[0], decision2) || len(d2) != 1 {
+		t.Fail()
+	}
+	t.Log(qs.Counter)
+
+	jobs3 := []ResourceVolume{job1, job2}
+	workers3 := []ResourceVolume{worker2}
+	d3 := qs.Schedule(jobs3, workers3)
+	decision3 := Decision{}
+
+	if !DecisionsEqual(d3[0], decision3) || (len(d2) != 1) {
+		t.Fail()
+	}
+	t.Log(qs.Counter)
+}

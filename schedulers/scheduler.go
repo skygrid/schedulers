@@ -118,7 +118,35 @@ func (m *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume, prFlag bool
 		mul = mul * v
 	}
 	x := float32(m.Counter[job.Owner.GetName()]) / float32(sum)
-	if (mul == 0) || (x <= job.Owner.Quota.GetProjectRatio()) {
+	if (mul == 0) || (x <= job.Owner.Quota.GetProjectRatio()) || !prFlag {
+		return true
+	}
+	return false
+}
+
+func (m *SimpleQuotaScheduler) checkCpuHoursQouta(job ResourceVolume, prFlag bool) bool {
+	sum := float32(0)
+	mul := float32(1)
+	for _, v := range m.CpuHoursCounter {
+		sum = sum + v
+		mul = mul * v
+	}
+	x := float32(m.CpuHoursCounter[job.Owner.GetName()]) / float32(sum)
+	if (mul == 0) || (x <= job.Owner.Quota.GetCpuHoursRatio()) || !prFlag {
+		return true
+	}
+	return false
+}
+
+func (m *SimpleQuotaScheduler) checkRamHoursQouta(job ResourceVolume, prFlag bool) bool {
+	sum := float32(0)
+	mul := float32(1)
+	for _, v := range m.RamMbHoursCounter {
+		sum = sum + v
+		mul = mul * v
+	}
+	x := float32(m.RamMbHoursCounter[job.Owner.GetName()]) / float32(sum)
+	if (mul == 0) || (x <= job.Owner.Quota.GetRamHoursRatio()) || !prFlag {
 		return true
 	}
 	return false
@@ -134,7 +162,9 @@ func (g *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) bool 
 		}
 		return false
 	case *Quotum_CpuHoursRatio:
-		fmt.Println("not implemented")
+		if g.checkCpuHoursQouta(job, prFlag) {
+			return true
+		}
 		return false
 	case *Quotum_GbAbs:
 		fmt.Println("not implemented")
@@ -149,7 +179,9 @@ func (g *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) bool 
 		}
 		return false
 	case *Quotum_RamHoursRatio:
-		fmt.Println("not implemented")
+		if g.checkRamHoursQouta(job, prFlag) {
+			return true
+		}
 		return false
 	case nil:
 		fmt.Errorf("owner.Quota The field is not set. %T", f)
