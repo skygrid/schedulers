@@ -10,6 +10,13 @@ planner switches on when:
 1) some tasks were just ended; 
 2) there is a new task arrived, it’s necessary to compute them and there is free resources available.
 
+The workers capacity almost always correlate with task’s requested characteristics. 
+So, any task is assumed to fit any worker.  
+It is assumed that workers are coming to scheduler through equal time periods. 
+And if a certain task hasn’t matched with arrived worker than the task could fit a another worker, that will come with time
+
+***
+
 Library consists of two general parts: 
 the **protobuf library messages description** and
 the **implemented Go library**
