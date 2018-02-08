@@ -4,7 +4,18 @@ For contibuting use the [protobuf](https://github.com/golang/protobuf) lib
 
 Project overview
 ----
-There are users grouped into project groups, 
+Disneyland system comprising of a set of workers(resources) and set of metatasks; 
+workers and tasks are characterised by:
+* the available/needed number of CPU cores;
+* the available/needed RAM memory in megabytes;
+* the available/needed GPU memory in megabytes;
+* the time, which could be allocated for a task computing / which requested to compute successfully certain task.
+
+All characteristics are assumed to be represented as finite integer numbers. 
+For every task planner should match a worker and create a `Decision`. 
+And matchmaking result is assumed to be a set of decisions
+
+Every task has its `Owner` and all owners are grouped into project groups, 
 each group has their own quota per day, also per resource; 
 planner switches on when: 
 1) some tasks were just ended; 
@@ -21,15 +32,15 @@ Library consists of two general parts:
 the **protobuf library messages description** and
 the **implemented Go library**
 
-**Go library** defines two schedulers based on matching (job x resource):
+**Go library** defines two schedulers based on matching (task x resource):
 
-1. `GeneralScheduler` just matching every single job with available resource
+1. `GeneralScheduler` just matching every single task with available resource
 
-2. `QuotaScheduler` matching every single job with available resource due to 
+2. `QuotaScheduler` matching every single task with available resource due to 
 allocated quota restrictions
     + `Quota` is the limit of CPU or memory usage  per single `Organization`, 
     it could be **fixed** and **relative** due to other `Organzation`'s
-    Also it indicates weight of `Organzation` jobs 
+    Also it indicates weight of `Organzation` tasks 
     (the more weight is, the more `Organzation` tasks will be computed)
     + E.g. to indicate that `Organzation` named 'SHiP' has 100 CPU-hours per week and weight is 50%
       ```
@@ -60,7 +71,7 @@ Generate client-library using `./gen.sh` and move the generated `schedmessages.p
 
 Library usage
 ---
-Create two projects (50% weight both and 100 CPU-hours per day) and one job for each and only 1 worker 
+Create two owners (50% weight both and 100 CPU-hours per day) each with one task and only 1 worker for them
 ```
 qs := QuotaScheduler{}
 qs.init()
