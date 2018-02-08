@@ -48,18 +48,6 @@ allocated quota restrictions
         o1 := Organization{Name: "SHiP", Quota: &quota1}
         ```
 
-Project structure
----
-```$xslt
-/schedulers
-    generalscheduler_test.go
-    quotascheduler_test.go
-    scheduler.go
-gen.sh
-run_tests.sh
-schedmessages.proto
-```
-
 Generating client-library
 ----
 To use this library you need to install `go get -u github.com/golang/protobuf` 

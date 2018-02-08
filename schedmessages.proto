@@ -5,11 +5,9 @@ message Quotum {
     float ProjectRatio = 1;
     oneof Q {
         float CpuHoursRatio = 10;
-        float GbRatio = 11;
-        float CpuHoursAbs = 12;
-        float GbAbs = 13;
-        float RamHoursAbs = 14;
-        float RamHoursRatio = 15;
+        float CpuHoursAbs = 11;
+        float RamHoursAbs = 12;
+        float RamHoursRatio = 13;
     }
 }
 
@@ -25,9 +23,8 @@ message ResourceVolume {
 
     uint32 RAMmb = 4;
     uint64 TimePeriod = 5;
-    float TemporaryStorageNeededGb = 6;
 
-    Organization Owner = 7;
+    Organization Owner = 6;
 }
 
 message Decision {

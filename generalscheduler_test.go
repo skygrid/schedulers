@@ -16,7 +16,7 @@ func ToString(decisions []Decision) string {
 
 func (volume ResourceVolume) ToString() string {
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("Id=%d CPU=%d GPU=%d RAM=%d Time=%d Gb=%f Owner %s ", volume.Id, volume.CPU, volume.GPU, volume.RAMmb, volume.TimePeriod, volume.TemporaryStorageNeededGb, volume.Owner))
+	buffer.WriteString(fmt.Sprintf("Id=%d CPU=%d GPU=%d RAM=%d Time=%d Owner %s ", volume.Id, volume.CPU, volume.GPU, volume.RAMmb, volume.TimePeriod, volume.Owner))
 	return buffer.String()
 }
 

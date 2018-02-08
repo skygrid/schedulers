@@ -166,12 +166,6 @@ func (g *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) bool 
 			return true
 		}
 		return false
-	case *Quotum_GbAbs:
-		fmt.Println("not implemented")
-		return false
-	case *Quotum_GbRatio:
-		fmt.Println("not implemented")
-		return false
 	case *Quotum_RamHoursAbs:
 		x := job.GetTimePeriod() * uint64(job.GetRAMmb()) / 3600.0
 		if float32(x) <= g.Quotas[name].GetRamHoursAbs()-g.RamMbHoursCounter[name] {
