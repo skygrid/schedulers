@@ -30,7 +30,7 @@ func Test_1(t *testing.T) {
 
 	worker := ResourceVolume{CPU: 3, Id: 10}
 
-	d1, _ := sqs.ScheduleOne(jobs1, worker)
+	d1 := sqs.ScheduleOne(jobs1, worker)
 	decision1 := Decision{JobIdx: 1, WorkerIdx: 10}
 
 	if !DecisionsEqual(d1, decision1) {
@@ -39,7 +39,7 @@ func Test_1(t *testing.T) {
 	t.Log(sqs.Counter)
 
 	jobs2 := []ResourceVolume{job1, job2}
-	d2, _ := sqs.ScheduleOne(jobs2, worker)
+	d2 := sqs.ScheduleOne(jobs2, worker)
 	decision2 := Decision{JobIdx: 2, WorkerIdx: 10}
 
 	if !DecisionsEqual(d2, decision2) {

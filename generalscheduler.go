@@ -1,9 +1,11 @@
 package scheduler
 
+// FCFS Scheduler
 type GeneralScheduler struct {
 	Scheduler
 }
 
+// FCFS scheduling method
 func (m *GeneralScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolume) []Decision {
 	//fcfs
 	var d []Decision
