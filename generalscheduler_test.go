@@ -21,7 +21,7 @@ func (volume ResourceVolume) ToString() string {
 }
 
 func (d Decision) Equal(x Decision) bool {
-	return (d.WorkerIdx == x.WorkerIdx) && (d.JobIdx == x.JobIdx)
+	return d.WorkerIdx == x.WorkerIdx && d.JobIdx == x.JobIdx
 }
 
 func checkDecisionsEqual(a []Decision, b []Decision) bool {

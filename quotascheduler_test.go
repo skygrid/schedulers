@@ -93,7 +93,7 @@ func Test_2(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || (len(d2) != 1) {
+	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -181,7 +181,7 @@ func Test_4(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || (len(d2) != 1) {
+	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -232,7 +232,7 @@ func Test_5(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || (len(d2) != 1) {
+	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)

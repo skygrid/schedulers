@@ -42,7 +42,7 @@ func (m *SimpleQuotaScheduler) update(job ResourceVolume) {
 func (g *SimpleQuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
 	mul := 1
 	flag := false
-	for Akey, _ := range g.Quotas {
+	for Akey := range g.Quotas {
 		for _, j := range jobs {
 			if j.Owner.GetName() == Akey {
 				flag = true
@@ -68,7 +68,7 @@ func (m *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume, prFlag bool
 		mul = mul * v
 	}
 	x := float32(m.Counter[job.Owner.GetName()]) / float32(sum)
-	if (mul == 0) || (x <= job.Owner.Quota.GetProjectRatio()) || !prFlag {
+	if mul == 0 || x <= job.Owner.Quota.GetProjectRatio() || !prFlag {
 		return true
 	}
 	return false
@@ -82,7 +82,7 @@ func (m *SimpleQuotaScheduler) checkCpuHoursQouta(job ResourceVolume, prFlag boo
 		mul = mul * v
 	}
 	x := float32(m.CpuHoursCounter[job.Owner.GetName()]) / float32(sum)
-	if (mul == 0) || (x <= job.Owner.Quota.GetCpuHoursRatio()) || !prFlag {
+	if mul == 0 || x <= job.Owner.Quota.GetCpuHoursRatio() || !prFlag {
 		return true
 	}
 	return false
@@ -96,7 +96,7 @@ func (m *SimpleQuotaScheduler) checkRamHoursQouta(job ResourceVolume, prFlag boo
 		mul = mul * v
 	}
 	x := float32(m.RamMbHoursCounter[job.Owner.GetName()]) / float32(sum)
-	if (mul == 0) || (x <= job.Owner.Quota.GetRamHoursRatio()) || !prFlag {
+	if mul == 0 || x <= job.Owner.Quota.GetRamHoursRatio() || !prFlag {
 		return true
 	}
 	return false
@@ -150,7 +150,7 @@ func (m *SimpleQuotaScheduler) ScheduleOne(jobs []ResourceVolume, w ResourceVolu
 	prFlag := m.checkProjectsInJobList(jobs)
 	for jIx, j := range jobs {
 		m.update(j)
-		if (j.CPU <= w.CPU) && (j.RAMmb <= w.RAMmb) && (j.GPU <= w.GPU) {
+		if j.CPU <= w.CPU && j.RAMmb <= w.RAMmb && j.GPU <= w.GPU {
 			if m.checkQuota(j, prFlag) && m.checkProjectQouta(j, prFlag) {
 				m.incrementCounters(j)
 				//kick allocated job
