@@ -1,4 +1,5 @@
 syntax = "proto3";
+package scheduler;
 
 message Quotum {
     float ProjectRatio = 1;

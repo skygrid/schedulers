@@ -1,1 +1,1 @@
-cd schedulers; go fmt .; go test -v .; cd ..
+go fmt .; go test -v .; cd ..

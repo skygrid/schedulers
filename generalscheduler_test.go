@@ -68,12 +68,12 @@ func TestMainScheduler(t *testing.T) {
 	workers := []ResourceVolume{worker1, worker2}
 
 	d := m.Schedule(jobs, workers)
-	d_check := []Decision{{JobIdx: 21, WorkerIdx: 21}, {JobIdx: 12, WorkerIdx: 12}}
+	dCheck := []Decision{{JobIdx: 21, WorkerIdx: 21}, {JobIdx: 12, WorkerIdx: 12}}
 
-	t.Log(ToString(d_check))
+	t.Log(ToString(dCheck))
 	t.Log(ToString(d))
 
-	if !checkDecisionsEqual(d, d_check) {
+	if !checkDecisionsEqual(d, dCheck) {
 		t.Fail()
 	}
 }
