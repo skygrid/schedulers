@@ -1,5 +1,7 @@
 Scheduling library for "[Disneyland](https://github.com/skygrid/disneyland)"
 ---
+[![Go Report Card](https://goreportcard.com/badge/github.com/andreiSaw/schedulers)](https://goreportcard.com/report/github.com/andreiSaw/schedulers)
+
 For contibuting use the [protobuf](https://github.com/golang/protobuf) lib
 
 Project overview
