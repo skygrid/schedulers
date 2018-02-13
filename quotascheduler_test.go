@@ -12,8 +12,7 @@ func decisionsEqual(a Decision, b Decision) bool {
 }
 
 func Test_1(t *testing.T) {
-	sqs := SimpleQuotaScheduler{}
-	sqs.InitMaps()
+	sqs := NewQuotaScheduler()
 
 	// both 50% project weight , 100 CPUhours
 	quota1 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
@@ -49,8 +48,7 @@ func Test_1(t *testing.T) {
 }
 
 func Test_2(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
 	// both 50% project weight , 100 CPUhours
 	quota1 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
@@ -100,8 +98,7 @@ func Test_2(t *testing.T) {
 }
 
 func Test_3(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
 	// both 50% project weight , 100 RAMhours
 	quota1 := Quotum{0.5, &Quotum_RamHoursAbs{1000}}
@@ -137,8 +134,7 @@ func Test_3(t *testing.T) {
 }
 
 func Test_4(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
 	// both 50% project weight , 1500 RAMhours
 	quota1 := Quotum{0.5, &Quotum_RamHoursAbs{1500}}
@@ -188,10 +184,9 @@ func Test_4(t *testing.T) {
 }
 
 func Test_5(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
-	// both 50% project weight , 1500 RAMhours
+	// both 50% project weight , 20% and 80% CPUhours
 	quota1 := Quotum{0.5, &Quotum_CpuHoursRatio{0.2}}
 	quota2 := Quotum{0.5, &Quotum_CpuHoursRatio{0.8}}
 
@@ -239,10 +234,9 @@ func Test_5(t *testing.T) {
 }
 
 func Test_6(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
-	// both 50% project weight , 1500 RAMhours
+	//  100% project weight , 2 CPUhours
 	quota1 := Quotum{1.0, &Quotum_CpuHoursAbs{2}}
 
 	o1 := Organization{Name: "SHiP", Quota: &quota1}
@@ -263,10 +257,9 @@ func Test_6(t *testing.T) {
 }
 
 func Test_7(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
-	// both 50% project weight ,
+	// both 50% project weight , 20% and 80% RAMhours
 	quota1 := Quotum{0.5, &Quotum_RamHoursRatio{0.2}}
 	quota2 := Quotum{0.5, &Quotum_RamHoursRatio{0.8}}
 
@@ -314,10 +307,10 @@ func Test_7(t *testing.T) {
 }
 
 func Test_0(t *testing.T) {
-	qs := QuotaScheduler{}
-	qs.InitMaps()
+	qs := NewQuotaScheduler()
 
-	quota1 := Quotum{0.5, nil}
+	//  100% project weight , not initiazed quota
+	quota1 := Quotum{1.0, nil}
 	o1 := Organization{Name: "SHiP", Quota: &quota1}
 	job1 := ResourceVolume{RAMmb: 2048, TimePeriod: 10, Owner: &o1, Id: 1}
 	worker1 := ResourceVolume{RAMmb: 2048, Id: 10}

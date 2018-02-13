@@ -3,7 +3,7 @@ package scheduler
 import "fmt"
 
 // mini QuotaScheduler
-type SimpleQuotaScheduler struct {
+type simpleQuotaScheduler struct {
 	Scheduler
 	Counter           map[string]int64
 	Quotas            map[string]*Quotum
@@ -12,27 +12,8 @@ type SimpleQuotaScheduler struct {
 	RamMbHoursCounter map[string]float32
 }
 
-// InitMaps of maps
-func (sqs *SimpleQuotaScheduler) InitMaps() {
-	if sqs.Counter == nil {
-		sqs.Counter = make(map[string]int64)
-	}
-	if sqs.Quotas == nil {
-		sqs.Quotas = make(map[string]*Quotum)
-	}
-	if sqs.CpuHoursCounter == nil {
-		sqs.CpuHoursCounter = make(map[string]float32)
-	}
-	if sqs.GbCounter == nil {
-		sqs.GbCounter = make(map[string]float32)
-	}
-	if sqs.RamMbHoursCounter == nil {
-		sqs.RamMbHoursCounter = make(map[string]float32)
-	}
-}
-
 //update maps
-func (sqs *SimpleQuotaScheduler) update(job ResourceVolume) {
+func (sqs *simpleQuotaScheduler) update(job ResourceVolume) {
 	name := job.Owner.GetName()
 	if _, ok := sqs.Quotas[name]; !ok {
 		sqs.Counter[name] = 0
@@ -44,7 +25,7 @@ func (sqs *SimpleQuotaScheduler) update(job ResourceVolume) {
 }
 
 // check if all owners are in jobs pool
-func (sqs *SimpleQuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
+func (sqs *simpleQuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) bool {
 	mul := 1
 	flag := false
 	for Akey := range sqs.Quotas {
@@ -66,7 +47,7 @@ func (sqs *SimpleQuotaScheduler) checkProjectsInJobList(jobs []ResourceVolume) b
 }
 
 // check whether ProjectQouta exceeded
-func (sqs *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume, prFlag bool) bool {
+func (sqs *simpleQuotaScheduler) checkProjectQouta(job ResourceVolume, prFlag bool) bool {
 	sum := int64(0)
 	mul := int64(1)
 	for _, v := range sqs.Counter {
@@ -81,7 +62,7 @@ func (sqs *SimpleQuotaScheduler) checkProjectQouta(job ResourceVolume, prFlag bo
 }
 
 // check whether CPU-hours Quota exceeded
-func (sqs *SimpleQuotaScheduler) checkCpuHoursQouta(job ResourceVolume, prFlag bool) bool {
+func (sqs *simpleQuotaScheduler) checkCpuHoursQouta(job ResourceVolume, prFlag bool) bool {
 	sum := float32(0)
 	mul := float32(1)
 	for _, v := range sqs.CpuHoursCounter {
@@ -96,7 +77,7 @@ func (sqs *SimpleQuotaScheduler) checkCpuHoursQouta(job ResourceVolume, prFlag b
 }
 
 // check whether RAM-hours Quota exceeded
-func (sqs *SimpleQuotaScheduler) checkRamHoursQouta(job ResourceVolume, prFlag bool) bool {
+func (sqs *simpleQuotaScheduler) checkRamHoursQouta(job ResourceVolume, prFlag bool) bool {
 	sum := float32(0)
 	mul := float32(1)
 	for _, v := range sqs.RamMbHoursCounter {
@@ -111,7 +92,7 @@ func (sqs *SimpleQuotaScheduler) checkRamHoursQouta(job ResourceVolume, prFlag b
 }
 
 // detects Quota type and check if it's exceeded on not
-func (sqs *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) bool {
+func (sqs *simpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) bool {
 	name := job.Owner.GetName()
 	switch f := job.Owner.Quota.Q.(type) {
 	case *Quotum_CpuHoursAbs:
@@ -146,7 +127,7 @@ func (sqs *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) boo
 }
 
 // increment map counters
-func (sqs *SimpleQuotaScheduler) incrementCounters(job ResourceVolume) {
+func (sqs *simpleQuotaScheduler) incrementCounters(job ResourceVolume) {
 	cpuHours := float32(job.GetTimePeriod()*uint64(job.GetCPU())) / 3600.0
 	ramMbHours := float32(job.GetTimePeriod()*uint64(job.GetRAMmb())) / 3600.0
 
@@ -157,7 +138,7 @@ func (sqs *SimpleQuotaScheduler) incrementCounters(job ResourceVolume) {
 }
 
 // matching one worker with one job from pool
-func (sqs *SimpleQuotaScheduler) scheduleOne(jobs []ResourceVolume, w ResourceVolume) Decision {
+func (sqs *simpleQuotaScheduler) scheduleOne(jobs []ResourceVolume, w ResourceVolume) Decision {
 	prFlag := sqs.checkProjectsInJobList(jobs)
 	d := Decision{}
 	for _, j := range jobs {
@@ -174,7 +155,7 @@ func (sqs *SimpleQuotaScheduler) scheduleOne(jobs []ResourceVolume, w ResourceVo
 }
 
 // after scheduling kicks allocated job from pool
-func (sqs *SimpleQuotaScheduler) kickAllocatedJob(d Decision, jobs []ResourceVolume) []ResourceVolume {
+func (sqs *simpleQuotaScheduler) kickAllocatedJob(d Decision, jobs []ResourceVolume) []ResourceVolume {
 	for jIx, j := range jobs {
 		if j.Id == d.JobIdx {
 			//kick allocated job

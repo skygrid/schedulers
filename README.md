@@ -63,8 +63,7 @@ Library usage
 ---
 Create two owners (50% weight both and 100 CPU-hours per day) each with one task and only 1 worker for them
 ```
-qs := QuotaScheduler{}
-qs.Init()
+qs := NewQuotaScheduler{}
 
 o1 := Organization{Name: "SHiP", Quota: &Quotum{0.5, &Quotum_CpuHoursAbs{100}}
 o2 := Organization{Name: "Monte_carlo", Quota: &Quotum{0.5, &Quotum_CpuHoursAbs{100}}}
