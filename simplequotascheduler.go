@@ -12,8 +12,8 @@ type SimpleQuotaScheduler struct {
 	RamMbHoursCounter map[string]float32
 }
 
-// init of maps
-func (sqs *SimpleQuotaScheduler) init() {
+// InitMaps of maps
+func (sqs *SimpleQuotaScheduler) InitMaps() {
 	if sqs.Counter == nil {
 		sqs.Counter = make(map[string]int64)
 	}
@@ -157,7 +157,7 @@ func (sqs *SimpleQuotaScheduler) incrementCounters(job ResourceVolume) {
 }
 
 // matching one worker with one job from pool
-func (sqs *SimpleQuotaScheduler) ScheduleOne(jobs []ResourceVolume, w ResourceVolume) Decision {
+func (sqs *SimpleQuotaScheduler) scheduleOne(jobs []ResourceVolume, w ResourceVolume) Decision {
 	prFlag := sqs.checkProjectsInJobList(jobs)
 	d := Decision{}
 	for _, j := range jobs {

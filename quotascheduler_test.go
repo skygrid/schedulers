@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func DecisionsEqual(a Decision, b Decision) bool {
+func decisionsEqual(a Decision, b Decision) bool {
 	if a.JobIdx == b.JobIdx && a.WorkerIdx == b.WorkerIdx {
 		return true
 	}
@@ -13,7 +13,7 @@ func DecisionsEqual(a Decision, b Decision) bool {
 
 func Test_1(t *testing.T) {
 	sqs := SimpleQuotaScheduler{}
-	sqs.init()
+	sqs.InitMaps()
 
 	// both 50% project weight , 100 CPUhours
 	quota1 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
@@ -30,19 +30,19 @@ func Test_1(t *testing.T) {
 
 	worker := ResourceVolume{CPU: 3, Id: 10}
 
-	d1 := sqs.ScheduleOne(jobs1, worker)
+	d1 := sqs.scheduleOne(jobs1, worker)
 	decision1 := Decision{JobIdx: 1, WorkerIdx: 10}
 
-	if !DecisionsEqual(d1, decision1) {
+	if !decisionsEqual(d1, decision1) {
 		t.Fail()
 	}
 	t.Log(sqs.Counter)
 
 	jobs2 := []ResourceVolume{job1, job2}
-	d2 := sqs.ScheduleOne(jobs2, worker)
+	d2 := sqs.scheduleOne(jobs2, worker)
 	decision2 := Decision{JobIdx: 2, WorkerIdx: 10}
 
-	if !DecisionsEqual(d2, decision2) {
+	if !decisionsEqual(d2, decision2) {
 		t.Fail()
 	}
 	t.Log(sqs.Counter)
@@ -50,7 +50,7 @@ func Test_1(t *testing.T) {
 
 func Test_2(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	// both 50% project weight , 100 CPUhours
 	quota1 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
@@ -83,7 +83,7 @@ func Test_2(t *testing.T) {
 	d2 := qs.Schedule(jobs2, workers2)
 	decision2 := Decision{JobIdx: 1, WorkerIdx: 11}
 
-	if !DecisionsEqual(d2[0], decision2) || len(d2) != 1 {
+	if !decisionsEqual(d2[0], decision2) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -93,7 +93,7 @@ func Test_2(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
+	if !decisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -101,7 +101,7 @@ func Test_2(t *testing.T) {
 
 func Test_3(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	// both 50% project weight , 100 RAMhours
 	quota1 := Quotum{0.5, &Quotum_RamHoursAbs{1000}}
@@ -121,7 +121,7 @@ func Test_3(t *testing.T) {
 	d1 := qs.Schedule(jobs1, []ResourceVolume{worker1})
 	decision1 := Decision{JobIdx: 1, WorkerIdx: 10}
 
-	if !DecisionsEqual(d1[0], decision1) || len(d1) != 1 {
+	if !decisionsEqual(d1[0], decision1) || len(d1) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -130,7 +130,7 @@ func Test_3(t *testing.T) {
 	d2 := qs.Schedule(jobs2, []ResourceVolume{worker1})
 	decision2 := Decision{JobIdx: 2, WorkerIdx: 10}
 
-	if !DecisionsEqual(d2[0], decision2) || len(d2) != 1 {
+	if !decisionsEqual(d2[0], decision2) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -138,7 +138,7 @@ func Test_3(t *testing.T) {
 
 func Test_4(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	// both 50% project weight , 1500 RAMhours
 	quota1 := Quotum{0.5, &Quotum_RamHoursAbs{1500}}
@@ -171,7 +171,7 @@ func Test_4(t *testing.T) {
 	d2 := qs.Schedule(jobs2, workers2)
 	decision2 := Decision{JobIdx: 1, WorkerIdx: 11}
 
-	if !DecisionsEqual(d2[0], decision2) || len(d2) != 1 {
+	if !decisionsEqual(d2[0], decision2) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -181,7 +181,7 @@ func Test_4(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
+	if !decisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -189,7 +189,7 @@ func Test_4(t *testing.T) {
 
 func Test_5(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	// both 50% project weight , 1500 RAMhours
 	quota1 := Quotum{0.5, &Quotum_CpuHoursRatio{0.2}}
@@ -222,7 +222,7 @@ func Test_5(t *testing.T) {
 	d2 := qs.Schedule(jobs2, workers2)
 	decision2 := Decision{JobIdx: 2, WorkerIdx: 11}
 
-	if !DecisionsEqual(d2[0], decision2) || len(d2) != 1 {
+	if !decisionsEqual(d2[0], decision2) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -232,7 +232,7 @@ func Test_5(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
+	if !decisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -240,7 +240,7 @@ func Test_5(t *testing.T) {
 
 func Test_6(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	// both 50% project weight , 1500 RAMhours
 	quota1 := Quotum{1.0, &Quotum_CpuHoursAbs{2}}
@@ -254,9 +254,9 @@ func Test_6(t *testing.T) {
 
 	worker1 := ResourceVolume{CPU: 4, Id: 10}
 
-	d1 := qs.ScheduleOne(jobs1, worker1)
+	d1 := qs.scheduleOne(jobs1, worker1)
 
-	if !DecisionsEqual(d1, Decision{}) {
+	if !decisionsEqual(d1, Decision{}) {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -264,7 +264,7 @@ func Test_6(t *testing.T) {
 
 func Test_7(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	// both 50% project weight ,
 	quota1 := Quotum{0.5, &Quotum_RamHoursRatio{0.2}}
@@ -297,7 +297,7 @@ func Test_7(t *testing.T) {
 	d2 := qs.Schedule(jobs2, workers2)
 	decision2 := Decision{JobIdx: 2, WorkerIdx: 11}
 
-	if !DecisionsEqual(d2[0], decision2) || len(d2) != 1 {
+	if !decisionsEqual(d2[0], decision2) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -307,7 +307,7 @@ func Test_7(t *testing.T) {
 	d3 := qs.Schedule(jobs3, workers3)
 	decision3 := Decision{}
 
-	if !DecisionsEqual(d3[0], decision3) || len(d2) != 1 {
+	if !decisionsEqual(d3[0], decision3) || len(d2) != 1 {
 		t.Fail()
 	}
 	t.Log(qs.Counter)
@@ -315,15 +315,15 @@ func Test_7(t *testing.T) {
 
 func Test_0(t *testing.T) {
 	qs := QuotaScheduler{}
-	qs.init()
+	qs.InitMaps()
 
 	quota1 := Quotum{0.5, nil}
 	o1 := Organization{Name: "SHiP", Quota: &quota1}
 	job1 := ResourceVolume{RAMmb: 2048, TimePeriod: 10, Owner: &o1, Id: 1}
 	worker1 := ResourceVolume{RAMmb: 2048, Id: 10}
 
-	d1 := qs.ScheduleOne([]ResourceVolume{job1}, worker1)
-	if !DecisionsEqual(d1, Decision{}) {
+	d1 := qs.scheduleOne([]ResourceVolume{job1}, worker1)
+	if !decisionsEqual(d1, Decision{}) {
 		t.Fail()
 	}
 }

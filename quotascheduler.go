@@ -11,7 +11,7 @@ func (q *QuotaScheduler) Schedule(jobs []ResourceVolume, workers []ResourceVolum
 	var d []Decision
 	var decision Decision
 	for _, worker := range workers {
-		decision = q.ScheduleOne(jobs, worker)
+		decision = q.scheduleOne(jobs, worker)
 		d = append(d, decision)
 		jobs = q.kickAllocatedJob(decision, jobs)
 	}
