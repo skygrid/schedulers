@@ -312,3 +312,18 @@ func Test_7(t *testing.T) {
 	}
 	t.Log(qs.Counter)
 }
+
+func Test_0(t *testing.T) {
+	qs := QuotaScheduler{}
+	qs.init()
+
+	quota1 := Quotum{0.5, nil}
+	o1 := Organization{Name: "SHiP", Quota: &quota1}
+	job1 := ResourceVolume{RAMmb: 2048, TimePeriod: 10, Owner: &o1, Id: 1}
+	worker1 := ResourceVolume{RAMmb: 2048, Id: 10}
+
+	d1 := qs.ScheduleOne([]ResourceVolume{job1}, worker1)
+	if !DecisionsEqual(d1, Decision{}) {
+		t.Fail()
+	}
+}

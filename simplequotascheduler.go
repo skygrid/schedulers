@@ -137,10 +137,10 @@ func (sqs *SimpleQuotaScheduler) checkQuota(job ResourceVolume, prFlag bool) boo
 		}
 		return false
 	case nil:
-		fmt.Errorf("owner.Quota The field is not set. %T", f)
+		fmt.Printf("owner.Quota The field is not set. %T", f)
 		return false
 	default:
-		fmt.Errorf("owner.Quota has unexpected type %T", f)
+		fmt.Printf("owner.Quota has unexpected type %T", f)
 		return false
 	}
 }
