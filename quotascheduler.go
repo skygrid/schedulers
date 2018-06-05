@@ -1,4 +1,4 @@
-package scheduler
+package schedulers
 
 // QuotaScheduler
 type QuotaScheduler struct {

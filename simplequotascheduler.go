@@ -1,4 +1,4 @@
-package scheduler
+package schedulers
 
 import "fmt"
 
@@ -146,7 +146,7 @@ func (sqs *simpleQuotaScheduler) scheduleOne(jobs []ResourceVolume, w ResourceVo
 		if j.CPU <= w.CPU && j.RAMmb <= w.RAMmb && j.GPU <= w.GPU {
 			if sqs.checkQuota(j, prFlag) && sqs.checkProjectQouta(j, prFlag) {
 				sqs.incrementCounters(j)
-				d = Decision{JobIdx: j.Id, WorkerIdx: w.Id}
+				d = Decision{JobIdx: j.Id, WorkerIdx: w.Id, CoresNum: w.CPU}
 				break
 			}
 		}

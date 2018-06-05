@@ -1,37 +1,54 @@
-package scheduler
+package schedulers
 
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"testing"
 )
 
 func toString(decisions []Decision) string {
 	var buffer bytes.Buffer
 	for i, d := range decisions {
-		buffer.WriteString(fmt.Sprintf("p#%d J%d W%d ", i, d.JobIdx, d.WorkerIdx))
+		buffer.WriteString(fmt.Sprintf("p#%d J%d W%d C%d \t", i, d.JobIdx, d.WorkerIdx, d.CoresNum))
 	}
 	return buffer.String()
 }
 
 func (volume ResourceVolume) toString() string {
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("Id=%d CPU=%d GPU=%d RAM=%d Time=%d Owner %s ", volume.Id, volume.CPU, volume.GPU, volume.RAMmb, volume.TimePeriod, volume.Owner))
+	buffer.WriteString(fmt.Sprintf("Id=%d CPU=%d Param=%d ", volume.Id, volume.CPU, volume.Param))
 	return buffer.String()
 }
 
-func (d Decision) equal(x Decision) bool {
-	return d.WorkerIdx == x.WorkerIdx && d.JobIdx == x.JobIdx
+func in_array(val interface{}, array interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(array).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(array)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(val, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+	return
 }
 
 func checkDecisionsEqual(a []Decision, b []Decision) bool {
-	for i, x := range a {
-		if !x.equal(b[i]) {
-			return false
-		}
-	}
 	if len(a) != len(b) {
 		return false
+	}
+	for _, x := range a {
+		b, _ := in_array(x, b)
+		if b {
+			return true
+		}
 	}
 	return true
 }
@@ -40,7 +57,7 @@ func TestMainScheduler(t *testing.T) {
 	m := GeneralScheduler{}
 
 	// 100% project weight , 100 CPUhours
-	quota := Quotum{1.0, &Quotum_CpuHoursAbs{100}}
+	quota := Quotum{ProjectRatio: 1.0}
 
 	o1 := Organization{Name: "SHiP", Quota: &quota}
 
@@ -55,7 +72,7 @@ func TestMainScheduler(t *testing.T) {
 	workers := []ResourceVolume{worker1, worker2}
 
 	d := m.Schedule(jobs, workers)
-	dCheck := []Decision{{JobIdx: 21, WorkerIdx: 21}, {JobIdx: 12, WorkerIdx: 12}}
+	dCheck := []Decision{{JobIdx: 21, WorkerIdx: 21, CoresNum: 2}, {JobIdx: 12, WorkerIdx: 12, CoresNum: 1}}
 
 	t.Log(toString(dCheck))
 	t.Log(toString(d))

@@ -49,6 +49,10 @@ allocated quota restrictions
         quota1 := Quotum{0.5, &Quotum_CpuHoursAbs{100}}
         o1 := Organization{Name: "SHiP", Quota: &quota1}
         ```
+3. `MlScheduler` approach allows us to use moldable scheduling.
+The point is all tasks from tasks list will be matched.
+    + tasks runned on the unfixed number of CPUs.
+    + using Keras NN for predcting running time
 
 Generating client-library
 ----
