@@ -1,0 +1,40 @@
+syntax = "proto3";
+package schedulers;
+
+message Quotum {
+    float ProjectRatio = 1;
+    oneof Q {
+        float CpuHoursRatio = 10;
+        float CpuHoursAbs = 11;
+        float RamHoursAbs = 12;
+        float RamHoursRatio = 13;
+    }
+}
+
+message Organization {
+    string Name = 1;
+    Quotum Quota = 2;
+}
+
+message ResourceVolume {
+    uint64 Id = 1;
+    uint32 CPU = 2;
+    uint32 GPU = 3;
+
+    uint32 RAMmb = 4;
+    uint64 TimePeriod = 5;
+
+    Organization Owner = 6;
+    uint64 Param = 7;
+}
+
+message Decision {
+    // Pairs jobs[idx] -> workers[idx]
+    uint64 JobIdx = 1;
+    uint64 WorkerIdx = 2;
+    uint32 CoresNum = 3;
+}
+
+message InputParamVector {
+    repeated uint64 Param = 1;
+}
